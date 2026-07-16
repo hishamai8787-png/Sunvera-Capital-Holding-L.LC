@@ -1,39 +1,71 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
+import { createServerClient } from "@supabase/ssr";
 
 /**
- * Middleware — protects API routes from external abuse while allowing
- * the app's own frontend to call them freely.
+ * Middleware — handles both Supabase session refresh and API protection.
  *
- * Strategy:
- *  - Requests with a valid Bearer token (APP_API_TOKEN) always pass.
- *  - Same-origin requests (matching the deployment's host) pass — this
- *    covers all frontend fetch() calls.
- *  - Everything else gets 401.
- *
- * When APP_API_TOKEN is not set, same-origin requests still pass and
- * external requests are blocked with a clear message.
+ * 1. Refreshes Supabase auth sessions on every request
+ * 2. Protects API routes from external abuse
+ * 3. Allows same-origin frontend calls to pass through
  */
 
-export function middleware(req: NextRequest) {
-  // Skip non-API paths entirely
+async function updateSession(request: NextRequest) {
+  let supabaseResponse = NextResponse.next({
+    request: { headers: request.headers },
+  });
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+
+  // If Supabase not configured, skip session refresh
+  if (!supabaseUrl || !supabaseKey) {
+    return { supabaseResponse, supabase: null as unknown };
+  }
+
+  const supabase = createServerClient(supabaseUrl, supabaseKey, {
+    cookies: {
+      getAll() {
+        return request.cookies.getAll();
+      },
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+        supabaseResponse = NextResponse.next({ request });
+        cookiesToSet.forEach(({ name, value, options }) =>
+          supabaseResponse.cookies.set(name, value, options)
+        );
+      },
+    },
+  });
+
+  // Refresh session if expired
+  await supabase.auth.getUser();
+
+  return { supabaseResponse, supabase };
+}
+
+export async function middleware(req: NextRequest) {
+  // Refresh Supabase session
+  const { supabaseResponse } = await updateSession(req);
+
+  // Skip non-API paths
   if (
     req.nextUrl.pathname.startsWith("/_next") ||
     req.nextUrl.pathname.startsWith("/favicon")
   ) {
-    return NextResponse.next();
+    return supabaseResponse;
   }
 
   if (!req.nextUrl.pathname.startsWith("/api")) {
-    return NextResponse.next();
+    return supabaseResponse;
   }
 
+  // API protection
   const auth = req.headers.get("authorization");
   const validToken = process.env.APP_API_TOKEN;
 
-  // 1. Valid Bearer token always passes (programmatic API access)
+  // 1. Valid Bearer token always passes
   if (validToken && auth === `Bearer ${validToken}`) {
-    return NextResponse.next();
+    return supabaseResponse;
   }
 
   // 2. Same-origin requests pass (frontend calling its own API)
@@ -41,14 +73,13 @@ export function middleware(req: NextRequest) {
   const host = req.headers.get("host");
   const referer = req.headers.get("referer");
 
-  // In production, origin/host will match. In dev, localhost variants match.
   const isSameOrigin =
     (origin && host && (origin.includes(host) || origin === `https://${host}` || origin === `http://${host}`)) ||
-    (referer && host && (referer.includes(host))) ||
-    (!origin && !referer); // server-side fetch within Next.js has no origin/referer
+    (referer && host && referer.includes(host)) ||
+    (!origin && !referer);
 
   if (isSameOrigin) {
-    return NextResponse.next();
+    return supabaseResponse;
   }
 
   // 3. Block external requests without a token
@@ -56,12 +87,12 @@ export function middleware(req: NextRequest) {
     {
       error: validToken
         ? "Unauthorized — provide a valid Bearer token."
-        : "External API access is not configured. Set APP_API_TOKEN to enable programmatic access.",
+        : "External API access is not configured.",
     },
     { status: 401 }
   );
 }
 
 export const config = {
-  matcher: ["/api/:path*"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico)$).*)"],
 };
