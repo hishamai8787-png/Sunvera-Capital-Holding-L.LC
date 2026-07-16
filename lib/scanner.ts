@@ -1,9 +1,8 @@
 // Opportunity scanner — runs the full analysis engine across a universe,
 // detects signals, and writes a "why investigate" brief for each flag.
 
-import { promises as fs } from "fs";
-import path from "path";
 import { analyzeCompany } from "./analyze";
+import { loadLastScanDb, saveScanDb } from "./db";
 
 export const SCAN_UNIVERSE = [
   "AAPL", "MSFT", "GOOGL", "META", "NVDA", "AMZN", "TSLA",
@@ -35,18 +34,6 @@ export interface ScanResult {
   scanned: number;
   unavailable: string[];
   opportunities: Opportunity[];
-}
-
-const DATA_DIR = path.join(process.cwd(), "data");
-const SCAN_FILE = path.join(DATA_DIR, "scan.json");
-
-export async function loadLastScan(): Promise<ScanResult | null> {
-  try {
-    const raw = await fs.readFile(SCAN_FILE, "utf8");
-    return JSON.parse(raw) as ScanResult;
-  } catch {
-    return null;
-  }
 }
 
 const pct = (v: number, d = 0) => `${(v * 100).toFixed(d)}%`;
@@ -85,7 +72,6 @@ async function scanSymbol(symbol: string): Promise<Opportunity | null> {
     if (revGrowth !== null && revGrowth >= 0.1) signals.push(`revenue compounding at ${pct(revGrowth)}/yr (3y)`);
     if (divYield !== null && divYield >= 0.03) signals.push(`${pct(divYield, 1)} dividend yield`);
 
-    // Altman Z is calibrated for industrial companies — meaningless for banks/insurers
     const isFinancial = (r.profile.sector || "").toLowerCase().includes("financial");
     if (!isFinancial) {
       if (r.altman.zone === "distress") risks.push("Altman Z in the distress zone");
@@ -135,6 +121,10 @@ async function scanSymbol(symbol: string): Promise<Opportunity | null> {
   }
 }
 
+export async function loadLastScan(): Promise<ScanResult | null> {
+  return loadLastScanDb<ScanResult>();
+}
+
 export async function runScan(extraSymbols: string[]): Promise<ScanResult> {
   const symbols = Array.from(
     new Set([...SCAN_UNIVERSE, ...extraSymbols.map((s) => s.trim().toUpperCase()).filter(Boolean)])
@@ -162,7 +152,6 @@ export async function runScan(extraSymbols: string[]): Promise<ScanResult> {
     opportunities,
   };
 
-  await fs.mkdir(DATA_DIR, { recursive: true });
-  await fs.writeFile(SCAN_FILE, JSON.stringify(result, null, 2), "utf8");
+  await saveScanDb(result);
   return result;
 }
