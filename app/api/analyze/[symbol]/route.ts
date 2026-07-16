@@ -1,21 +1,35 @@
 // JSON API: GET /api/analyze/AAPL — full analysis report.
-// This is the same engine the web UI uses; later iOS/Android apps can call it directly.
 
 import { NextResponse } from "next/server";
 import { analyzeCompany } from "@/lib/analyze";
 import { DataSourceError } from "@/lib/fmp";
+import { validateTicker } from "@/lib/validation";
+import { rateLimitResponse } from "@/lib/rateLimit";
 
 export async function GET(
-  _req: Request,
+  req: Request,
   { params }: { params: Promise<{ symbol: string }> }
 ) {
-  const { symbol } = await params;
+  const rl = rateLimitResponse(req, "analyze");
+  if (rl) return rl;
+
+  const { symbol: rawSymbol } = await params;
+  const symbol = validateTicker(rawSymbol);
+  if (!symbol) {
+    return NextResponse.json(
+      { error: "Invalid ticker symbol. Use 1-6 uppercase letters." },
+      { status: 400 }
+    );
+  }
+
   try {
     const report = await analyzeCompany(symbol);
     return NextResponse.json(report);
   } catch (err) {
+    if (err instanceof DataSourceError) {
+      return NextResponse.json({ error: err.message }, { status: err.status ?? 502 });
+    }
     const message = err instanceof Error ? err.message : "Analysis failed.";
-    const status = err instanceof DataSourceError ? (err.status ?? 502) : 500;
-    return NextResponse.json({ error: message }, { status });
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

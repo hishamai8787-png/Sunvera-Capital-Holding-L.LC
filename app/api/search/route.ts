@@ -1,7 +1,6 @@
-// GET /api/search?q=apple — ticker autocomplete.
-// Merges FMP symbol-search and name-search, prioritizing US-listed results.
-
 import { NextResponse } from "next/server";
+import { sanitizeString } from "@/lib/validation";
+import { rateLimitResponse } from "@/lib/rateLimit";
 
 interface RawResult {
   symbol: string;
@@ -12,9 +11,12 @@ interface RawResult {
 }
 
 export async function GET(req: Request) {
+  const rl = rateLimitResponse(req, "search");
+  if (rl) return rl;
+
   const key = process.env.FMP_API_KEY;
   const url = new URL(req.url);
-  const q = (url.searchParams.get("q") || "").trim();
+  const q = sanitizeString(url.searchParams.get("q") || "", 50);
   if (!key || key.startsWith("PASTE_") || q.length < 1) {
     return NextResponse.json([]);
   }
@@ -44,7 +46,6 @@ export async function GET(req: Request) {
     return true;
   });
 
-  // US-listed, USD, plain symbols first (that's what the free data plan covers)
   const score = (r: RawResult) => {
     let s = 0;
     if (["NASDAQ", "NYSE", "AMEX"].includes(r.exchange)) s -= 10;
@@ -57,10 +58,7 @@ export async function GET(req: Request) {
 
   return NextResponse.json(
     merged.slice(0, 7).map((r) => ({
-      symbol: r.symbol,
-      name: r.name,
-      exchange: r.exchange,
-      currency: r.currency,
+      symbol: r.symbol, name: r.name, exchange: r.exchange, currency: r.currency,
     }))
   );
 }
