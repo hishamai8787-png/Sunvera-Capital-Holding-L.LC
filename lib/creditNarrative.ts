@@ -76,6 +76,13 @@ export function buildCreditNarrative(
     const cr = pick("currentRatio");
     const alt = pick("altman");
 
+    const isFinancial = (data.profile.sector || "").toLowerCase().includes("financial");
+    if (isFinancial) {
+      p.push(
+        `Note: ${name} is a financial-sector obligor. Deposit funding and float make standard corporate leverage metrics (Net Debt/EBITDA, Altman Z) unreliable here — read the ratios below as indicative only, and weight regulatory capital, asset quality, and funding stability in the final decision.`
+      );
+    }
+
     p.push(
       `Leverage stands at ${nd.display} net debt to EBITDA (${nd.assessment === "strong" ? "conservative" : nd.assessment === "acceptable" ? "within normal corporate bounds" : nd.assessment === "watch" ? "elevated" : "aggressive"} against the ${nd.benchmark} benchmark)${d.netDebt !== null && d.netDebt < 0 ? " — in fact the company holds more cash than debt, so leverage risk is nominal" : ""}. ` +
         (ic.value === null

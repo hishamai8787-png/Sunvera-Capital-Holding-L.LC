@@ -113,16 +113,21 @@ export function evaluateMandate(report: AnalysisReport, mandate: Mandate): Symbo
     `≥ ${fmtPct(mandate.minDividendYield)}`
   );
 
+  // Net Debt/EBITDA is meaningless for banks/insurers — deposits and float are
+  // not corporate leverage. Mark the rule as not-applicable for financials.
+  const isFinancial = (report.profile.sector || "").toLowerCase().includes("financial");
   const ndEbitda = metricValue(report, "strength", "ndEbitda");
   push(
     "Maximum Net Debt/EBITDA",
     mandate.maxNetDebtEbitda !== null,
     mandate.maxNetDebtEbitda === null
       ? null
-      : ndEbitda === null
-        ? true // no meaningful leverage data usually means net cash / no EBITDA issue is rare; treat missing as pass
-        : ndEbitda <= mandate.maxNetDebtEbitda,
-    fmtX(ndEbitda),
+      : isFinancial
+        ? true
+        : ndEbitda === null
+          ? true // no meaningful leverage data usually means net cash; treat missing as pass
+          : ndEbitda <= mandate.maxNetDebtEbitda,
+    isFinancial ? "n/a (financial)" : fmtX(ndEbitda),
     `≤ ${fmtX(mandate.maxNetDebtEbitda)}`
   );
 

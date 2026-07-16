@@ -113,9 +113,12 @@ export async function GET(
   try {
     report = await buildCreditReport(decodeURIComponent(symbol), facility, peers);
   } catch (err) {
-    const message = err instanceof Error ? err.message : "Failed to build report.";
     const status = err instanceof DataSourceError ? (err.status ?? 502) : 500;
-    return new Response(message, { status });
+    console.error("[credit/docx] Error:", err);
+    return new Response(
+      status === 404 ? "Company not found." : "Failed to generate credit report.",
+      { status }
+    );
   }
 
   const cur = report.currency;
