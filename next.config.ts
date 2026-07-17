@@ -1,12 +1,27 @@
 import type { NextConfig } from "next";
 
+// ---------- Sentry wrapper ----------
+// Sentry is initialized only if SENTRY_DSN is set. This lets the app
+// run without Sentry in development and opt-in for production.
+const withSentry = (config: NextConfig): NextConfig => {
+  const sentryDsn = process.env.SENTRY_DSN;
+  if (!sentryDsn) return config;
+
+  // @sentry/nextjs uses withSentryConfig — but we avoid the build-time
+  // wrapper complexity here. Instead we configure the runtime SDK
+  // in sentry.client.config.ts, sentry.server.config.ts, and
+  // instrumentation.ts. Next.js picks these up automatically.
+  return config;
+};
+
+// ---------- Security headers ----------
 const ContentSecurityPolicy = `
   default-src 'self';
   script-src 'self' 'unsafe-inline' 'unsafe-eval' https://s3.tradingview.com;
   style-src 'self' 'unsafe-inline' https://s3.tradingview.com;
   img-src 'self' data: https: blob:;
   font-src 'self' data:;
-  connect-src 'self' https://financialmodelingprep.com https://finnhub.io https://s3.tradingview.com wss://wss.tradingview.com;
+  connect-src 'self' https://financialmodelingprep.com https://finnhub.io https://s3.tradingview.com wss://wss.tradingview.com https://*.sentry.io;
   frame-src 'self' https://s.tradingview.com;
   object-src 'none';
   base-uri 'self';
@@ -65,4 +80,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default withSentry(nextConfig);

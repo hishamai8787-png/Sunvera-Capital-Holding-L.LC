@@ -32,17 +32,17 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="flex items-center justify-center min-h-screen px-6">
+    <main className="flex items-center justify-center min-h-screen px-6 bg-[#0a0e1a]">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
-          <span className="inline-flex w-12 h-12 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 items-center justify-center text-slate-950 font-black text-lg mb-4">
+          <span className="inline-flex w-14 h-14 rounded-xl bg-gradient-to-br from-[#c5a35e] to-[#a8851f] items-center justify-center text-[#0a0e1a] font-black text-xl mb-4 gold-glow">
             S
           </span>
-          <h1 className="text-2xl font-semibold text-slate-100">Sunvera Analyst</h1>
-          <p className="text-sm text-slate-400 mt-1">Sign in to access the platform</p>
+          <h1 className="text-2xl font-semibold text-slate-100 tracking-tight">Sunvera Analyst</h1>
+          <p className="text-sm text-slate-500 mt-1">Sign in to access the platform</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl border border-slate-800 bg-slate-900/60 p-6">
+        <form onSubmit={handleSubmit} className="space-y-4 card-surface p-7">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-1.5">
               Email
@@ -53,7 +53,7 @@ export default function LoginPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-slate-100 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 outline-none transition-colors"
+              className="w-full rounded-lg border border-slate-700/80 bg-[#131826] px-4 py-2.5 text-slate-100 focus:border-[#c5a35e] focus:ring-1 focus:ring-[#c5a35e] outline-none transition-colors"
               placeholder="admin@sunveracapital.com"
             />
           </div>
@@ -67,21 +67,25 @@ export default function LoginPage() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-2.5 text-slate-100 focus:border-amber-400 focus:ring-1 focus:ring-amber-400 outline-none transition-colors"
+              className="w-full rounded-lg border border-slate-700/80 bg-[#131826] px-4 py-2.5 text-slate-100 focus:border-[#c5a35e] focus:ring-1 focus:ring-[#c5a35e] outline-none transition-colors"
               placeholder="••••••••"
             />
           </div>
           {error && (
-            <p className="text-sm text-red-400">{error}</p>
+            <p className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{error}</p>
           )}
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 font-semibold px-4 py-2.5 transition-colors"
+            className="w-full rounded-lg bg-gradient-to-r from-[#c5a35e] to-[#a8851f] hover:from-[#d4b06e] hover:to-[#b8951f] disabled:opacity-50 text-[#0a0e1a] font-semibold px-4 py-2.5 transition-all"
           >
             {loading ? "Signing in..." : "Sign in"}
           </button>
         </form>
+
+        <p className="text-center text-xs text-slate-600">
+          Sunvera Capital Holding LLC · Institutional Research Platform
+        </p>
       </div>
     </main>
   );
