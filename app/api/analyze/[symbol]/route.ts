@@ -10,7 +10,7 @@ export async function GET(
   req: Request,
   { params }: { params: Promise<{ symbol: string }> }
 ) {
-  const rl = rateLimitResponse(req, "analyze");
+  const rl = await rateLimitResponse(req, "analyze");
   if (rl) return rl;
 
   const { symbol: rawSymbol } = await params;
@@ -26,10 +26,17 @@ export async function GET(
     const report = await analyzeCompany(symbol);
     return NextResponse.json(report);
   } catch (err) {
+    // Log full error server-side, return generic messages to client
+    console.error("[analyze] Error:", err instanceof Error ? err.message : String(err));
     if (err instanceof DataSourceError) {
-      return NextResponse.json({ error: err.message }, { status: err.status ?? 502 });
+      return NextResponse.json(
+        { error: "Unable to retrieve data from the data source. Please try again later." },
+        { status: err.status ?? 502 }
+      );
     }
-    const message = err instanceof Error ? err.message : "Analysis failed.";
-    return NextResponse.json({ error: message }, { status: 500 });
+    return NextResponse.json(
+      { error: "Analysis failed. Please try again." },
+      { status: 500 }
+    );
   }
 }

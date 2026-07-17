@@ -7,6 +7,9 @@ import { createServerClient } from "@supabase/ssr";
  * 1. Refreshes Supabase auth sessions on every request
  * 2. Protects API routes from external abuse
  * 3. Allows same-origin frontend calls to pass through
+ *
+ * SECURITY: Uses exact host matching (not substring) to prevent origin spoofing.
+ * Requests without Origin/Referer headers are NOT automatically allowed.
  */
 
 async function updateSession(request: NextRequest) {
@@ -43,6 +46,41 @@ async function updateSession(request: NextRequest) {
   return { supabaseResponse, supabase };
 }
 
+/**
+ * Exact same-origin check — prevents substring bypass attacks.
+ * Compares the parsed Origin/Referer host against the request host.
+ */
+function isSameOriginRequest(req: NextRequest): boolean {
+  const host = req.headers.get("host");
+  if (!host) return false;
+
+  // Check Origin header (preferred)
+  const origin = req.headers.get("origin");
+  if (origin) {
+    try {
+      const originUrl = new URL(origin);
+      return originUrl.host === host;
+    } catch {
+      return false;
+    }
+  }
+
+  // Fall back to Referer header
+  const referer = req.headers.get("referer");
+  if (referer) {
+    try {
+      const refererUrl = new URL(referer);
+      return refererUrl.host === host;
+    } catch {
+      return false;
+    }
+  }
+
+  // No Origin or Referer header — block by default
+  // Direct API calls (curl, Postman, server scripts) must use a Bearer token
+  return false;
+}
+
 export async function middleware(req: NextRequest) {
   // Refresh Supabase session
   const { supabaseResponse } = await updateSession(req);
@@ -69,16 +107,8 @@ export async function middleware(req: NextRequest) {
   }
 
   // 2. Same-origin requests pass (frontend calling its own API)
-  const origin = req.headers.get("origin");
-  const host = req.headers.get("host");
-  const referer = req.headers.get("referer");
-
-  const isSameOrigin =
-    (origin && host && (origin.includes(host) || origin === `https://${host}` || origin === `http://${host}`)) ||
-    (referer && host && referer.includes(host)) ||
-    (!origin && !referer);
-
-  if (isSameOrigin) {
+  //    Uses exact host matching — no substring, no missing-header bypass
+  if (isSameOriginRequest(req)) {
     return supabaseResponse;
   }
 

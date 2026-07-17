@@ -1,21 +1,19 @@
 /**
- * Simple in-memory rate limiter for API routes.
- * In production, swap for Upstash Redis for distributed rate limiting.
- * 
+ * Rate limiter for API routes.
+ *
+ * Production: Uses Upstash Redis for distributed rate limiting across
+ * serverless function instances. Set UPSTASH_REDIS_REST_URL and
+ * UPSTASH_REDIS_REST_TOKEN env vars to enable.
+ *
+ * Development: Falls back to in-memory rate limiting (single instance only).
+ *
  * Free FMP plan: 250 requests/day
  * Free Finnhub plan: 60 requests/minute
  */
 
-interface RateBucket {
-  count: number;
-  resetAt: number;
-}
-
-const buckets = new Map<string, RateBucket>();
-
 interface RateLimitConfig {
-  windowMs: number;   // time window in milliseconds
-  maxRequests: number; // max requests per window
+  windowMs: number;
+  maxRequests: number;
 }
 
 // Per-IP rate limits for API endpoints
@@ -30,12 +28,19 @@ const SCANNER_LIMIT: RateLimitConfig = {
   maxRequests: 3,           // 3 scans per minute
 };
 
-export function rateLimit(
-  ip: string,
-  route: string,
-  config: RateLimitConfig = API_LIMIT
+// ---------- In-memory fallback (development only) ----------
+
+interface RateBucket {
+  count: number;
+  resetAt: number;
+}
+
+const buckets = new Map<string, RateBucket>();
+
+function inMemoryRateLimit(
+  key: string,
+  config: RateLimitConfig
 ): { allowed: boolean; remaining: number; resetAt: number } {
-  const key = `${ip}:${route}`;
   const now = Date.now();
   const bucket = buckets.get(key);
 
@@ -56,19 +61,70 @@ export function rateLimit(
   };
 }
 
+// ---------- Upstash Redis (production) ----------
+
+let _upstashEnabled: boolean | null = null;
+
+function isUpstashEnabled(): boolean {
+  if (_upstashEnabled === null) {
+    _upstashEnabled = !!(process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN);
+  }
+  return _upstashEnabled;
+}
+
+async function upstashRateLimit(
+  key: string,
+  config: RateLimitConfig
+): Promise<{ allowed: boolean; remaining: number; resetAt: number }> {
+  const { Redis } = await import("@upstash/redis");
+  const redis = Redis.fromEnv();
+
+  const redisKey = `ratelimit:${key}`;
+  const now = Date.now();
+  const resetAt = now + config.windowMs;
+
+  // Sliding window via atomic INCR + EXPIRE
+  const count = await redis.incr(redisKey);
+  if (count === 1) {
+    await redis.expire(redisKey, Math.ceil(config.windowMs / 1000));
+  }
+
+  if (count > config.maxRequests) {
+    return { allowed: false, remaining: 0, resetAt };
+  }
+
+  return { allowed: true, remaining: config.maxRequests - count, resetAt };
+}
+
+// ---------- Public API ----------
+
 export function getClientIp(req: Request): string {
   const forwarded = req.headers.get("x-forwarded-for");
   const realIp = req.headers.get("x-real-ip");
   return (forwarded?.split(",")[0] || realIp || "unknown").trim();
 }
 
-export function rateLimitResponse(
+export async function rateLimit(
+  ip: string,
+  route: string,
+  config: RateLimitConfig = API_LIMIT
+): Promise<{ allowed: boolean; remaining: number; resetAt: number }> {
+  const key = `${ip}:${route}`;
+
+  if (isUpstashEnabled()) {
+    return upstashRateLimit(key, config);
+  }
+
+  return inMemoryRateLimit(key, config);
+}
+
+export async function rateLimitResponse(
   req: Request,
   route: string,
   config?: RateLimitConfig
-): Response | null {
+): Promise<Response | null> {
   const ip = getClientIp(req);
-  const result = rateLimit(ip, route, config);
+  const result = await rateLimit(ip, route, config);
   if (!result.allowed) {
     const retryAfter = Math.ceil((result.resetAt - Date.now()) / 1000);
     return new Response(

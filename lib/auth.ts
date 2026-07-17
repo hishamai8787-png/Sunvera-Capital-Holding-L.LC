@@ -1,20 +1,19 @@
 /**
  * NextAuth.js configuration — Sunvera Capital.
- * 
+ *
  * Uses credentials provider with database-backed user verification.
  * To enable: install next-auth and set NEXTAUTH_SECRET env var.
- * 
- * npm install next-auth
- * 
+ *
  * Required env vars:
  * NEXTAUTH_SECRET=your_random_secret (generate: openssl rand -base64 32)
  * NEXTAUTH_URL=https://yourdomain.com
- * NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
- * SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+ * ADMIN_EMAIL=your_admin_email
+ * ADMIN_PASSWORD_HASH=your_bcrypt_hash (generate: node -e "console.log(require('bcryptjs').hashSync('password', 10))")
  */
 
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import bcrypt from "bcryptjs";
 
 // User roles
 export type UserRole = "admin" | "analyst" | "viewer";
@@ -26,8 +25,6 @@ export interface AuthUser {
   role: UserRole;
 }
 
-// For now, this is a placeholder config. When next-auth is installed,
-// import this in your route handler at /api/auth/[...nextauth]/route.ts
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -39,18 +36,22 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
 
-        // TODO: Verify against Supabase users table
-        // For now, single admin account via env vars
         const adminEmail = process.env.ADMIN_EMAIL;
-        const adminPassword = process.env.ADMIN_PASSWORD;
+        const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH;
 
-        if (
-          credentials.email === adminEmail &&
-          credentials.password === adminPassword
-        ) {
+        if (!adminEmail || !adminPasswordHash) {
+          console.error("[auth] ADMIN_EMAIL or ADMIN_PASSWORD_HASH not configured");
+          return null;
+        }
+
+        // Use bcrypt for secure password comparison
+        const emailMatch = credentials.email === adminEmail;
+        const passwordMatch = await bcrypt.compare(credentials.password, adminPasswordHash);
+
+        if (emailMatch && passwordMatch) {
           return {
             id: "1",
-            email: adminEmail!,
+            email: adminEmail,
             name: "Administrator",
             role: "admin" as UserRole,
           } as AuthUser;

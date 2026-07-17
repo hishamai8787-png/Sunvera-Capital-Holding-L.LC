@@ -3,24 +3,33 @@
  *
  * Uses @supabase/supabase-js for database operations.
  * Falls back to filesystem in development when Supabase is not configured.
+ *
+ * SECURITY: Never uses the service role key for client-side operations.
+ * The service role key bypasses all Row Level Security policies.
  */
 
 import { promises as fs } from "fs";
 import path from "path";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
-// ---------- Database client ----------
+// ---------- Database client (cached singleton) ----------
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
 export function hasDatabase(): boolean {
   return !!(supabaseUrl && supabaseKey);
 }
 
+// Cache the Supabase client instance — avoid creating a new client per request
+let _supabaseClient: ReturnType<typeof createSupabaseClient> | null = null;
+
 function getSupabase() {
   if (!hasDatabase()) throw new Error("Supabase not configured");
-  return createSupabaseClient(supabaseUrl!, supabaseKey!);
+  if (!_supabaseClient) {
+    _supabaseClient = createSupabaseClient(supabaseUrl!, supabaseKey!);
+  }
+  return _supabaseClient;
 }
 
 // ---------- Filesystem fallback (development only) ----------

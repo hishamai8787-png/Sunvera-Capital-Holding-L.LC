@@ -1,26 +1,23 @@
 import { NextResponse } from "next/server";
-import { loadClients, saveClients } from "@/lib/clients";
-import { validateClientData } from "@/lib/validation";
 import { rateLimitResponse } from "@/lib/rateLimit";
+import { loadClientsDb, saveClientsDb } from "@/lib/db";
+import type { Client } from "@/lib/clientTypes";
 
 export async function GET(req: Request) {
-  const rl = rateLimitResponse(req, "clients-get");
+  const rl = await rateLimitResponse(req, "clients-get");
   if (rl) return rl;
-  return NextResponse.json(await loadClients());
+  const clients = await loadClientsDb<Client>();
+  return NextResponse.json(clients);
 }
 
 export async function POST(req: Request) {
-  const rl = rateLimitResponse(req, "clients-save");
+  const rl = await rateLimitResponse(req, "clients-save");
   if (rl) return rl;
-
   try {
-    const body = await req.json();
-    if (!validateClientData(body)) {
-      return NextResponse.json({ error: "Invalid client data format." }, { status: 400 });
-    }
-    await saveClients(body);
-    return NextResponse.json({ saved: body.length });
+    const clients = (await req.json()) as Client[];
+    await saveClientsDb(clients);
+    return NextResponse.json({ success: true });
   } catch {
-    return NextResponse.json({ error: "Invalid request." }, { status: 400 });
+    return NextResponse.json({ error: "Failed to save clients." }, { status: 500 });
   }
 }

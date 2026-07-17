@@ -2,12 +2,17 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY;
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
 export const createClient = (cookieStore: Awaited<ReturnType<typeof cookies>>) => {
+  // SECURITY: Never fall back to the service role key — it bypasses RLS
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error("Supabase publishable key is required. Set NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY.");
+  }
+
   return createServerClient(
-    supabaseUrl!,
-    supabaseKey!,
+    supabaseUrl,
+    supabaseKey,
     {
       cookies: {
         getAll() {

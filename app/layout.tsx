@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
+import { SessionProvider } from "next-auth/react";
 import TickerSearch from "@/components/TickerSearch";
 import CurrencyProvider, { CurrencySelect } from "@/components/CurrencyProvider";
 import "./globals.css";
@@ -32,6 +33,7 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-slate-950 text-slate-100">
+        <SessionProvider>
         <CurrencyProvider>
         {/* Global header */}
         <header className="sticky top-0 z-40 border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md">
@@ -98,6 +100,7 @@ export default function RootLayout({
           </div>
         </footer>
         </CurrencyProvider>
+        </SessionProvider>
       </body>
     </html>
   );
