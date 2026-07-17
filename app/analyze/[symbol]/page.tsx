@@ -13,6 +13,15 @@ import {
 
 export const dynamic = "force-dynamic";
 
+export async function generateMetadata({ params }: { params: Promise<{ symbol: string }> }) {
+  const { symbol } = await params;
+  const sym = decodeURIComponent(symbol).toUpperCase();
+  return {
+    title: `${sym} — Equity Analysis | Sunvera Capital`,
+    description: `Institutional-grade equity analysis for ${sym}: 100+ ratios, scoring, DCF, and narrative.`,
+  };
+}
+
 export default async function AnalyzePage({
   params,
 }: {
@@ -26,19 +35,19 @@ export default async function AnalyzePage({
   } catch (err) {
     const message =
       err instanceof DataSourceError || err instanceof Error
-        ? err.message
+        ? "An error occurred while fetching data."
         : "Something went wrong.";
     return (
       <main className="flex items-center justify-center px-6 py-32">
-        <div className="max-w-lg text-center">
-          <div className="text-5xl mb-4">🔍</div>
+        <div className="max-w-lg text-center" role="alert">
+          <div className="text-5xl mb-4" aria-hidden="true">🔍</div>
           <h1 className="text-2xl font-semibold mb-3">
             Couldn&apos;t analyze {symbol.toUpperCase()}
           </h1>
           <p className="text-slate-400 mb-6">{message}</p>
           <Link
             href="/"
-            className="inline-block rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold px-6 py-2.5"
+            className="inline-block rounded-lg bg-gradient-to-r from-[#c5a35e] to-[#a8851f] hover:from-[#d4b06e] hover:to-[#b8951f] text-[#0a0e1a] font-semibold px-6 py-2.5 transition-all focus-visible:outline-2 focus-visible:outline-[#c5a35e] focus-visible:outline-offset-2"
           >
             Back to search
           </Link>
@@ -60,7 +69,7 @@ export default async function AnalyzePage({
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={profile.image}
-                alt=""
+                alt={`${profile.companyName} logo`}
                 className="w-14 h-14 rounded-xl bg-white/90 p-1.5 object-contain shrink-0"
               />
             )}
@@ -81,16 +90,17 @@ export default async function AnalyzePage({
               </div>
               <div
                 className={`text-sm font-medium tabular-nums ${chg >= 0 ? "text-emerald-400" : "text-red-400"}`}
+                aria-label={`Price change: ${chg >= 0 ? "up" : "down"} ${Math.abs(chg).toFixed(2)} percent`}
               >
-                {chg >= 0 ? "▲" : "▼"} {chg >= 0 ? "+" : ""}
+                <span aria-hidden="true">{chg >= 0 ? "▲" : "▼"}</span> {chg >= 0 ? "+" : ""}
                 {chg.toFixed(2)}% today
               </div>
             </div>
             <Link
               href={`/credit/${report.symbol}`}
-              className="rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold px-4 py-2.5 text-sm shadow-lg shadow-amber-500/20 transition-colors"
+              className="rounded-xl bg-gradient-to-r from-[#c5a35e] to-[#a8851f] hover:from-[#d4b06e] hover:to-[#b8951f] text-[#0a0e1a] font-semibold px-4 py-2.5 text-sm shadow-lg shadow-[#c5a35e]/10 transition-all focus-visible:outline-2 focus-visible:outline-[#c5a35e] focus-visible:outline-offset-2"
             >
-              🏦 Credit proposal
+              <span aria-hidden="true">🏦</span> Credit proposal
             </Link>
           </div>
         </div>
@@ -113,7 +123,7 @@ export default async function AnalyzePage({
         {/* Full ratio tables */}
         <h2 className="text-lg font-semibold text-slate-200 pt-2">
           Full Ratio Detail{" "}
-          <span className="text-sm text-slate-500 font-normal">
+          <span className="text-sm text-slate-400 font-normal">
             ({report.yearsOfData} years of statements)
           </span>
         </h2>
@@ -123,7 +133,7 @@ export default async function AnalyzePage({
           ))}
         </div>
 
-        <p className="text-xs text-slate-600 pb-4">
+        <p className="text-xs text-slate-400 pb-4">
           Generated {new Date(report.generatedAt).toLocaleString()} · {report.yearsOfData} years of
           statements analyzed.
         </p>

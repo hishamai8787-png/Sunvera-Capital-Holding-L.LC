@@ -2,7 +2,7 @@ import TVWidget from "@/components/tv/TVWidget";
 import Watchlist from "@/components/Watchlist";
 import MarketNews from "@/components/MarketNews";
 
-export const metadata = { title: "Markets — Sunvera Analyst" };
+export const metadata = { title: "Markets — Sunvera Capital" };
 
 const tvTheme = {
   colorTheme: "dark",
@@ -14,7 +14,7 @@ export default function MarketsPage() {
   return (
     <main className="text-slate-100">
       {/* Ticker tape */}
-      <div className="border-b border-slate-800">
+      <div className="border-b border-slate-800" aria-label="Live market ticker tape">
         <TVWidget
           script="ticker-tape"
           height={46}
@@ -41,13 +41,13 @@ export default function MarketsPage() {
       <div className="max-w-7xl mx-auto px-6 py-6 space-y-6">
         {/* Header */}
         <div>
-          <p className="text-xs tracking-[0.3em] uppercase text-amber-400/80">Sunvera Capital</p>
+          <p className="text-xs tracking-[0.3em] uppercase text-[#c5a35e]">Sunvera Capital</p>
           <h1 className="text-2xl font-semibold">Market Data Hub</h1>
         </div>
 
         {/* Row 1: overview + watchlist */}
         <div className="grid lg:grid-cols-5 gap-6">
-          <div className="lg:col-span-2">
+          <section aria-label="Market overview" className="lg:col-span-2">
             <TVWidget
               script="market-overview"
               height={560}
@@ -59,10 +59,10 @@ export default function MarketsPage() {
                 height: "100%",
                 largeChartUrl: "",
                 showSymbolLogo: true,
-                plotLineColorGrowing: "rgba(251, 191, 36, 1)",
-                plotLineColorFalling: "rgba(251, 191, 36, 1)",
-                belowLineFillColorGrowing: "rgba(251, 191, 36, 0.12)",
-                belowLineFillColorFalling: "rgba(251, 191, 36, 0.12)",
+                plotLineColorGrowing: "rgba(197, 163, 94, 1)",
+                plotLineColorFalling: "rgba(197, 163, 94, 1)",
+                belowLineFillColorGrowing: "rgba(197, 163, 94, 0.12)",
+                belowLineFillColorFalling: "rgba(197, 163, 94, 0.12)",
                 gridLineColor: "rgba(30, 41, 59, 0)",
                 scaleFontColor: "rgba(148, 163, 184, 1)",
                 tabs: [
@@ -111,7 +111,7 @@ export default function MarketsPage() {
                 ],
               }}
             />
-          </div>
+          </section>
           <div className="lg:col-span-3 space-y-6">
             <Watchlist />
             <MarketNews />
@@ -119,7 +119,7 @@ export default function MarketsPage() {
         </div>
 
         {/* Row 2: heatmap */}
-        <div>
+        <section aria-label="S&P 500 sector heatmap">
           <h2 className="text-sm font-semibold text-slate-200 mb-2">S&amp;P 500 Heatmap</h2>
           <TVWidget
             script="stock-heatmap"
@@ -141,10 +141,10 @@ export default function MarketsPage() {
               height: "100%",
             }}
           />
-        </div>
+        </section>
 
         {/* Row 3: forex cross rates */}
-        <div>
+        <section aria-label="Foreign exchange cross rates">
           <h2 className="text-sm font-semibold text-slate-200 mb-2">FX Cross Rates</h2>
           <TVWidget
             script="forex-cross-rates"
@@ -157,7 +157,7 @@ export default function MarketsPage() {
               backgroundColor: "#0f172a",
             }}
           />
-        </div>
+        </section>
 
       </div>
     </main>

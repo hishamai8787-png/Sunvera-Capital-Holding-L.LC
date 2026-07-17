@@ -35,14 +35,14 @@ export default function LoginPage() {
     <main className="flex items-center justify-center min-h-screen px-6 bg-[#0a0e1a]">
       <div className="w-full max-w-md space-y-6">
         <div className="text-center">
-          <span className="inline-flex w-14 h-14 rounded-xl bg-gradient-to-br from-[#c5a35e] to-[#a8851f] items-center justify-center text-[#0a0e1a] font-black text-xl mb-4 gold-glow">
+          <span className="inline-flex w-14 h-14 rounded-xl bg-gradient-to-br from-[#c5a35e] to-[#a8851f] items-center justify-center text-[#0a0e1a] font-black text-xl mb-4 gold-glow" aria-hidden="true">
             S
           </span>
           <h1 className="text-2xl font-semibold text-slate-100 tracking-tight">Sunvera Analyst</h1>
           <p className="text-sm text-slate-500 mt-1">Sign in to access the platform</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4 card-surface p-7">
+        <form onSubmit={handleSubmit} className="space-y-4 card-surface p-7" aria-busy={loading}>
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-slate-300 mb-1.5">
               Email
@@ -55,6 +55,7 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
               className="w-full rounded-lg border border-slate-700/80 bg-[#131826] px-4 py-2.5 text-slate-100 focus:border-[#c5a35e] focus:ring-1 focus:ring-[#c5a35e] outline-none transition-colors"
               placeholder="admin@sunveracapital.com"
+              autoComplete="email"
             />
           </div>
           <div>
@@ -69,21 +70,27 @@ export default function LoginPage() {
               onChange={(e) => setPassword(e.target.value)}
               className="w-full rounded-lg border border-slate-700/80 bg-[#131826] px-4 py-2.5 text-slate-100 focus:border-[#c5a35e] focus:ring-1 focus:ring-[#c5a35e] outline-none transition-colors"
               placeholder="••••••••"
+              autoComplete="current-password"
             />
           </div>
-          {error && (
-            <p className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{error}</p>
-          )}
+          <div aria-live="polite" role="status">
+            {error && (
+              <p className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+                {error}
+              </p>
+            )}
+          </div>
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-gradient-to-r from-[#c5a35e] to-[#a8851f] hover:from-[#d4b06e] hover:to-[#b8951f] disabled:opacity-50 text-[#0a0e1a] font-semibold px-4 py-2.5 transition-all"
+            aria-busy={loading}
+            className="w-full rounded-lg bg-gradient-to-r from-[#c5a35e] to-[#a8851f] hover:from-[#d4b06e] hover:to-[#b8951f] disabled:opacity-50 text-[#0a0e1a] font-semibold px-4 py-2.5 transition-all focus-visible:outline-2 focus-visible:outline-[#c5a35e] focus-visible:outline-offset-2"
           >
             {loading ? "Signing in..." : "Sign in"}
           </button>
         </form>
 
-        <p className="text-center text-xs text-slate-600">
+        <p className="text-center text-xs text-slate-400">
           Sunvera Capital Holding LLC · Institutional Research Platform
         </p>
       </div>

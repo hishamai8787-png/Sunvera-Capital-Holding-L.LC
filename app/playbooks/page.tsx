@@ -2,7 +2,7 @@ import { loadTrades } from "@/lib/trades";
 import { buildPlaybook, type SegmentStats } from "@/lib/playbook";
 import TradeImport from "@/components/TradeImport";
 
-export const metadata = { title: "Playbooks — Sunvera Analyst" };
+export const metadata = { title: "Playbooks — Sunvera Capital" };
 export const dynamic = "force-dynamic";
 
 const pct = (v: number | null, d = 1) => (v === null ? "—" : `${(v * 100).toFixed(d)}%`);
@@ -15,7 +15,7 @@ const money = (v: number | null) => {
   return `${sign}$${abs.toFixed(0)}`;
 };
 const pnlColor = (v: number | null) =>
-  v === null ? "text-slate-500" : v >= 0 ? "text-emerald-400" : "text-red-400";
+  v === null ? "text-slate-400" : v >= 0 ? "text-emerald-400" : "text-red-400";
 
 function SegmentCard({ s }: { s: SegmentStats }) {
   return (
@@ -68,11 +68,11 @@ export default async function PlaybooksPage() {
         {/* Header */}
         <div className="rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-900 to-slate-900/40 p-5 space-y-4">
           <div>
-            <p className="text-xs tracking-[0.3em] uppercase text-amber-400/80">Sunvera Capital</p>
+            <p className="text-xs tracking-[0.3em] uppercase text-[#c5a35e]">Sunvera Capital</p>
             <h1 className="text-2xl font-semibold mt-0.5">Trade Playbooks</h1>
             <p className="text-sm text-slate-400 mt-1 max-w-2xl">
               Your historical trades, analyzed by sector, asset class, market, and year — so the
-              next decision starts from &ldquo;here&rsquo;s what actually worked.&rdquo;
+              next decision starts from &ldquo;here&apos;s what actually worked.&rdquo;
             </p>
           </div>
           <TradeImport hasData={hasData} />
@@ -80,7 +80,7 @@ export default async function PlaybooksPage() {
 
         {!hasData && (
           <div className="rounded-2xl border border-dashed border-slate-700 p-12 text-center">
-            <div className="text-5xl mb-4">📒</div>
+            <div className="text-5xl mb-4" aria-hidden="true">📒</div>
             <h2 className="text-lg font-semibold mb-2">No trade history yet</h2>
             <p className="text-sm text-slate-400 max-w-md mx-auto">
               Download the template, fill in your past trades (or export from your broker and match
@@ -93,24 +93,24 @@ export default async function PlaybooksPage() {
         {pb && (
           <>
             {/* Overall stats */}
-            <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
+            <div className="grid grid-cols-2 lg:grid-cols-5 gap-3" role="region" aria-label="Overall performance summary">
               {[
                 { label: "Closed Trades", value: String(pb.overall.closed), color: "text-slate-100" },
-                { label: "Hit Rate", value: pct(pb.overall.winRate, 0), color: pb.overall.winRate !== null && pb.overall.winRate >= 0.5 ? "text-emerald-300" : "text-amber-300" },
+                { label: "Hit Rate", value: pct(pb.overall.winRate, 0), color: pb.overall.winRate !== null && pb.overall.winRate >= 0.5 ? "text-emerald-300" : "text-[#e0c887]" },
                 { label: "Avg Return / Trade", value: pct(pb.overall.avgReturn), color: pnlColor(pb.overall.avgReturn) },
                 { label: "Median Return", value: pct(pb.overall.medianReturn), color: pnlColor(pb.overall.medianReturn) },
                 { label: "Total P&L", value: money(pb.overall.totalPnl), color: pnlColor(pb.overall.totalPnl) },
               ].map((s) => (
                 <div key={s.label} className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-                  <div className="text-xs uppercase tracking-wider text-slate-500 mb-1">{s.label}</div>
+                  <div className="text-xs uppercase tracking-wider text-slate-400 mb-1">{s.label}</div>
                   <div className={`text-2xl font-semibold tabular-nums ${s.color}`}>{s.value}</div>
                 </div>
               ))}
             </div>
 
             {/* Overall narrative */}
-            <div className="rounded-xl border border-amber-400/20 bg-amber-400/5 p-5 space-y-1.5">
-              <h2 className="text-sm font-semibold text-amber-300 mb-1">The Book Overall</h2>
+            <div className="rounded-xl border border-[#c5a35e]/20 bg-[#c5a35e]/5 p-5 space-y-1.5">
+              <h2 className="text-sm font-semibold text-[#e0c887] mb-1">The Book Overall</h2>
               {pb.overall.narrative.map((p, i) => (
                 <p key={i} className="text-sm text-slate-200 leading-relaxed">
                   {p}
@@ -126,22 +126,25 @@ export default async function PlaybooksPage() {
             {/* Full trade log */}
             <section>
               <h2 className="text-sm font-semibold text-slate-200 mb-3">
-                Trade Log <span className="text-slate-500 font-normal">({trades.length})</span>
+                Trade Log <span className="text-slate-400 font-normal">({trades.length})</span>
               </h2>
               <div className="rounded-xl border border-slate-800 bg-slate-900/60 overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
+                    <caption className="sr-only">
+                      Trade log: {trades.length} trades with dates, instrument, class, sector, market, direction, return, and P&L
+                    </caption>
                     <thead>
-                      <tr className="text-xs uppercase tracking-wider text-slate-500 bg-slate-900">
-                        <th className="px-4 py-2.5 text-left font-medium">Opened</th>
-                        <th className="px-3 py-2.5 text-left font-medium">Closed</th>
-                        <th className="px-3 py-2.5 text-left font-medium">Instrument</th>
-                        <th className="px-3 py-2.5 text-left font-medium">Class</th>
-                        <th className="px-3 py-2.5 text-left font-medium">Sector</th>
-                        <th className="px-3 py-2.5 text-left font-medium">Mkt</th>
-                        <th className="px-3 py-2.5 text-left font-medium">Dir</th>
-                        <th className="px-3 py-2.5 text-right font-medium">Return</th>
-                        <th className="px-4 py-2.5 text-right font-medium">P&amp;L</th>
+                      <tr className="text-xs uppercase tracking-wider text-slate-400 bg-slate-900">
+                        <th scope="col" className="px-4 py-2.5 text-left font-medium">Opened</th>
+                        <th scope="col" className="px-3 py-2.5 text-left font-medium">Closed</th>
+                        <th scope="col" className="px-3 py-2.5 text-left font-medium">Instrument</th>
+                        <th scope="col" className="px-3 py-2.5 text-left font-medium">Class</th>
+                        <th scope="col" className="px-3 py-2.5 text-left font-medium">Sector</th>
+                        <th scope="col" className="px-3 py-2.5 text-left font-medium">Mkt</th>
+                        <th scope="col" className="px-3 py-2.5 text-left font-medium">Dir</th>
+                        <th scope="col" className="px-3 py-2.5 text-right font-medium">Return</th>
+                        <th scope="col" className="px-4 py-2.5 text-right font-medium">P&amp;L</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -151,11 +154,11 @@ export default async function PlaybooksPage() {
                           <tr key={t.id} className="border-t border-slate-800/60">
                             <td className="px-4 py-2 text-slate-400 whitespace-nowrap">{t.dateOpened}</td>
                             <td className="px-3 py-2 text-slate-400 whitespace-nowrap">
-                              {t.dateClosed ?? <span className="text-amber-400/80">open</span>}
+                              {t.dateClosed ?? <span className="text-[#c5a35e]">open</span>}
                             </td>
                             <td className="px-3 py-2 text-slate-200">
                               <span className="font-medium">{t.symbol}</span>
-                              <span className="text-slate-500 text-xs ml-1.5 hidden lg:inline">{t.name}</span>
+                              <span className="text-slate-400 text-xs ml-1.5 hidden lg:inline">{t.name}</span>
                             </td>
                             <td className="px-3 py-2 text-slate-400">{t.assetClass}</td>
                             <td className="px-3 py-2 text-slate-400">{t.sector}</td>

@@ -28,11 +28,9 @@ export default function Watchlist() {
   const [loaded, setLoaded] = useState(false);
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // load saved list
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      // hydrate from localStorage after mount (not available during SSR)
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setSymbols(saved ? (JSON.parse(saved) as string[]) : DEFAULTS);
     } catch {
@@ -42,7 +40,6 @@ export default function Watchlist() {
     setLoaded(true);
   }, []);
 
-  // persist
   useEffect(() => {
     if (loaded) localStorage.setItem(STORAGE_KEY, JSON.stringify(symbols));
   }, [symbols, loaded]);
@@ -66,10 +63,8 @@ export default function Watchlist() {
     });
   }, []);
 
-  // poll
   useEffect(() => {
     if (!loaded || !symbols.length) return;
-    // immediate fetch on mount/list change, then poll on an interval
     // eslint-disable-next-line react-hooks/set-state-in-effect
     refresh(symbols);
     if (timer.current) clearInterval(timer.current);
@@ -88,33 +83,47 @@ export default function Watchlist() {
   const remove = (s: string) => setSymbols((prev) => prev.filter((x) => x !== s));
 
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/60 overflow-hidden">
+    <section
+      className="rounded-xl border border-slate-800 bg-slate-900/60 overflow-hidden"
+      aria-label="Watchlist with live price updates"
+    >
       <div className="flex items-center justify-between px-5 py-3 border-b border-slate-800 bg-slate-900">
         <h3 className="text-sm font-semibold text-slate-200">
-          Watchlist <span className="text-xs text-slate-500 font-normal">(live · 20s refresh)</span>
+          Watchlist <span className="text-xs text-slate-400 font-normal">(live · 20s refresh)</span>
         </h3>
-        <form onSubmit={add} className="flex gap-1.5">
+        <form onSubmit={add} className="flex gap-1.5" aria-label="Add ticker to watchlist">
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Add ticker"
-            className="w-28 rounded-md bg-slate-800 border border-slate-700 px-2.5 py-1 text-xs text-slate-100 outline-none focus:border-amber-400"
+            aria-label="Ticker symbol to add"
+            className="w-28 rounded-md bg-slate-800 border border-slate-700 px-2.5 py-1 text-xs text-slate-100 outline-none focus:border-[#c5a35e] focus-visible:outline-1 focus-visible:outline-[#c5a35e]"
           />
           <button
             type="submit"
-            className="rounded-md bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-semibold px-3 py-1"
+            aria-label="Add ticker to watchlist"
+            className="rounded-md bg-[#c5a35e] hover:bg-[#d4b06e] text-[#0a0e1a] text-xs font-semibold px-3 py-1 min-w-[32px] min-h-[28px] focus-visible:outline-2 focus-visible:outline-[#c5a35e] focus-visible:outline-offset-2"
           >
             +
           </button>
         </form>
       </div>
       <table className="w-full text-sm">
+        <thead className="sr-only">
+          <tr>
+            <th scope="col">Symbol</th>
+            <th scope="col">Price</th>
+            <th scope="col">Change</th>
+            <th scope="col">Actions</th>
+            <th scope="col">Remove</th>
+          </tr>
+        </thead>
         <tbody>
           {symbols.map((s) => {
             const q = quotes[s];
             const up = q && q.changePercent >= 0;
             return (
-              <tr key={s} className="border-b border-slate-800/60 last:border-0 group">
+              <tr key={s} className="border-b border-slate-800/60 last:border-0">
                 <td className="px-5 py-2.5">
                   <span className="font-medium text-slate-100">{s}</span>
                 </td>
@@ -123,7 +132,7 @@ export default function Watchlist() {
                 </td>
                 <td
                   className={`px-3 py-2.5 text-right tabular-nums font-medium ${
-                    !q || q.error ? "text-slate-600" : up ? "text-emerald-400" : "text-red-400"
+                    !q || q.error ? "text-slate-400" : up ? "text-emerald-400" : "text-red-400"
                   }`}
                 >
                   {q && !q.error
@@ -131,18 +140,18 @@ export default function Watchlist() {
                     : ""}
                 </td>
                 <td className="px-3 py-2.5 text-right text-xs whitespace-nowrap">
-                  <Link href={`/analyze/${s}`} className="text-amber-300/80 hover:text-amber-200 mr-3">
+                  <Link href={`/analyze/${s}`} className="text-[#c5a35e] hover:text-[#e0c887] mr-3 focus-visible:outline-2 focus-visible:outline-[#c5a35e] focus-visible:outline-offset-2">
                     Analyze
                   </Link>
-                  <Link href={`/credit/${s}`} className="text-slate-400 hover:text-slate-200">
+                  <Link href={`/credit/${s}`} className="text-slate-400 hover:text-slate-200 focus-visible:outline-2 focus-visible:outline-[#c5a35e] focus-visible:outline-offset-2">
                     Credit
                   </Link>
                 </td>
-                <td className="pr-4 py-2.5 text-right w-8">
+                <td className="pr-4 py-2.5 text-right w-12">
                   <button
                     onClick={() => remove(s)}
-                    className="text-slate-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                    aria-label={`Remove ${s}`}
+                    aria-label={`Remove ${s} from watchlist`}
+                    className="text-slate-400 hover:text-red-400 transition-opacity min-w-[44px] min-h-[44px] flex items-center justify-center focus-visible:outline-2 focus-visible:outline-[#c5a35e] focus-visible:outline-offset-2"
                   >
                     ✕
                   </button>
@@ -152,13 +161,13 @@ export default function Watchlist() {
           })}
           {loaded && !symbols.length && (
             <tr>
-              <td className="px-5 py-6 text-center text-slate-500 text-sm" colSpan={5}>
+              <td className="px-5 py-6 text-center text-slate-400 text-sm" colSpan={5}>
                 Add a ticker above to start your watchlist.
               </td>
             </tr>
           )}
         </tbody>
       </table>
-    </div>
+    </section>
   );
 }
