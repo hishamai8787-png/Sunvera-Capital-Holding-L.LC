@@ -3,15 +3,26 @@ import { buildCreditReport } from "@/lib/creditReport";
 import { DataSourceError } from "@/lib/fmp";
 import type { FacilityInput } from "@/lib/credit";
 import { money } from "@/lib/ratios";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({ params }: { params: Promise<{ symbol: string }> }): Promise<Metadata> {
+  const { symbol } = await params;
+  const sym = decodeURIComponent(symbol).toUpperCase();
+  return {
+    title: `${sym} — Credit Proposal`,
+    description: `Bank-grade credit assessment for ${sym}: DSCR, leverage, pro-forma facility impact, peer benchmarks, risk rating, and Word document export for committee.`,
+    alternates: { canonical: `https://sunveracapital.com/credit/${sym}` },
+  };
+}
 
 const assessColor: Record<string, string> = {
   strong: "text-emerald-300",
   acceptable: "text-emerald-500",
-  watch: "text-amber-400",
+  watch: "text-[#e0c887]",
   weak: "text-red-400",
-  na: "text-slate-500",
+  na: "text-slate-400",
 };
 
 const fx = (v: number | null, d = 1) => (v === null ? "—" : `${v.toFixed(d)}x`);
@@ -50,15 +61,16 @@ export default async function CreditPage({
     report = await buildCreditReport(decodeURIComponent(symbol), facility, peerList);
   } catch (err) {
     const message =
-      err instanceof DataSourceError || err instanceof Error ? err.message : "Failed.";
+      err instanceof DataSourceError || err instanceof Error ? "An error occurred while building the credit proposal." : "Failed.";
     return (
-      <main className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center px-6">
-        <div className="max-w-lg text-center">
+      <main className="min-h-screen bg-[#0a0e1a] text-slate-100 flex items-center justify-center px-6">
+        <div className="max-w-lg text-center" role="alert">
+          <div className="text-5xl mb-4" aria-hidden="true">⚠️</div>
           <h1 className="text-2xl font-semibold mb-3">
             Couldn&apos;t build a proposal for {symbol.toUpperCase()}
           </h1>
           <p className="text-slate-400 mb-6">{message}</p>
-          <Link href="/" className="inline-block rounded-lg bg-amber-500 text-slate-950 font-semibold px-6 py-2.5">
+          <Link href="/" className="inline-block rounded-lg bg-gradient-to-r from-[#c5a35e] to-[#a8851f] hover:from-[#d4b06e] hover:to-[#b8951f] text-[#0a0e1a] font-semibold px-6 py-2.5 transition-all focus-visible:outline-2 focus-visible:outline-[#c5a35e] focus-visible:outline-offset-2">
             Back to search
           </Link>
         </div>
@@ -69,7 +81,7 @@ export default async function CreditPage({
   const { assessment, narrative, peers, profile } = report;
   const cur = report.currency;
   const g = assessment.rating.grade;
-  const gradeColor = g <= 3 ? "text-emerald-300" : g <= 5 ? "text-amber-300" : "text-red-400";
+  const gradeColor = g <= 3 ? "text-emerald-300" : g <= 5 ? "text-[#e0c887]" : "text-red-400";
   const docxUrl = `/api/credit/${report.symbol}/docx?${new URLSearchParams(
     Object.fromEntries(Object.entries(sp).filter(([, v]) => v)) as Record<string, string>
   ).toString()}`;
@@ -78,55 +90,58 @@ export default async function CreditPage({
     <main className="text-slate-100">
       <div className="max-w-6xl mx-auto px-6 py-8 space-y-6">
         {/* Header */}
-        <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-900 to-slate-900/40 p-5">
-          <div className="flex items-center gap-4 min-w-0">
-            {profile.image && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={profile.image}
-                alt=""
-                className="w-14 h-14 rounded-xl bg-white/90 p-1.5 object-contain shrink-0"
-              />
-            )}
-            <div className="min-w-0">
-              <Link
-                href={`/analyze/${report.symbol}`}
-                className="text-xs text-slate-500 hover:text-amber-300"
+        <div className="card-surface bg-gradient-to-r from-slate-900 to-slate-900/40 p-5">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-4 min-w-0">
+              {profile.image && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={profile.image}
+                  alt={`${profile.companyName} logo`}
+                  className="w-14 h-14 rounded-xl bg-white/90 p-1.5 object-contain shrink-0"
+                />
+              )}
+              <div className="min-w-0">
+                <Link
+                  href={`/analyze/${report.symbol}`}
+                  className="text-xs text-slate-400 hover:text-[#e0c887]"
+                >
+                  ← Equity analysis
+                </Link>
+                <h1 className="text-2xl sm:text-3xl font-semibold truncate">
+                  Credit Proposal <span className="text-slate-500">·</span> {profile.companyName}
+                </h1>
+                <p className="text-sm text-slate-400 mt-0.5 truncate">
+                  {profile.exchange} · {profile.sector} · {profile.industry} · Generated{" "}
+                  {new Date(report.generatedAt).toLocaleDateString()}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-5">
+              <div className="text-right">
+                <div className="text-xs uppercase tracking-wider text-slate-400">Internal Rating</div>
+                <div className={`text-3xl font-bold ${gradeColor}`}>{g}/10</div>
+                <div className={`text-sm ${gradeColor}`}>{assessment.rating.label}</div>
+              </div>
+              <a
+                href={docxUrl}
+                className="rounded-xl bg-gradient-to-r from-[#c5a35e] to-[#a8851f] hover:from-[#d4b06e] hover:to-[#b8951f] text-[#0a0e1a] font-semibold px-4 py-2.5 text-sm shadow-lg shadow-[#c5a35e]/10 transition-all focus-visible:outline-2 focus-visible:outline-[#c5a35e] focus-visible:outline-offset-2"
               >
-                ← Equity analysis
-              </Link>
-              <h1 className="text-2xl sm:text-3xl font-semibold truncate">
-                Credit Proposal <span className="text-slate-500">·</span> {profile.companyName}
-              </h1>
-              <p className="text-sm text-slate-400 mt-0.5 truncate">
-                {profile.exchange} · {profile.sector} · {profile.industry} · Generated{" "}
-                {new Date(report.generatedAt).toLocaleDateString()}
-              </p>
+                <span aria-hidden="true">⬇</span> Word (.docx)
+              </a>
             </div>
-          </div>
-          <div className="flex items-center gap-5">
-            <div className="text-right">
-              <div className="text-xs uppercase tracking-wider text-slate-500">Internal Rating</div>
-              <div className={`text-3xl font-bold ${gradeColor}`}>{g}/10</div>
-              <div className={`text-sm ${gradeColor}`}>{assessment.rating.label}</div>
-            </div>
-            <a
-              href={docxUrl}
-              className="rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold px-4 py-2.5 text-sm shadow-lg shadow-amber-500/20 transition-colors"
-            >
-              ⬇ Word (.docx)
-            </a>
           </div>
         </div>
 
         {/* Facility form */}
         <form
           method="get"
-          className="rounded-2xl border border-slate-800 bg-slate-900/60 p-5"
+          className="card-surface p-5"
+          aria-label="Facility parameters"
         >
           <h2 className="text-sm font-semibold text-slate-200 mb-3">
-            💼 Facility parameters{" "}
-            <span className="text-xs font-normal text-slate-500">
+            <span aria-hidden="true">💼</span> Facility parameters{" "}
+            <span className="text-xs font-normal text-slate-400">
               — set the terms, then Recalculate to see the pro-forma impact
             </span>
           </h2>
@@ -142,7 +157,7 @@ export default async function CreditPage({
                 name={f.name}
                 defaultValue={f.def || ""}
                 placeholder={f.placeholder}
-                className="mt-1 w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-slate-100 outline-none focus:border-amber-400"
+                className="mt-1 w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#c5a35e] focus-visible:outline-1 focus-visible:outline-[#c5a35e]"
               />
             </label>
           ))}
@@ -151,7 +166,7 @@ export default async function CreditPage({
             <select
               name="type"
               defaultValue={sp.type || "Term Loan"}
-              className="mt-1 w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-slate-100"
+              className="mt-1 w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-slate-100 focus:border-[#c5a35e]"
             >
               {["Term Loan", "Revolving Credit", "Bridge Loan", "Trade Finance", "Bond / Note"].map((t) => (
                 <option key={t}>{t}</option>
@@ -163,7 +178,7 @@ export default async function CreditPage({
             <input
               name="security"
               defaultValue={sp.security || "Unsecured"}
-              className="mt-1 w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-slate-100"
+              className="mt-1 w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-slate-100 focus:border-[#c5a35e]"
             />
           </label>
           <label className="text-xs text-slate-400 col-span-2 md:col-span-1">
@@ -172,12 +187,12 @@ export default async function CreditPage({
               name="peers"
               defaultValue={sp.peers || ""}
               placeholder="auto"
-              className="mt-1 w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-slate-100"
+              className="mt-1 w-full rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-slate-100 focus:border-[#c5a35e]"
             />
           </label>
           <button
             type="submit"
-            className="rounded-md bg-amber-500/90 hover:bg-amber-400 text-slate-950 font-semibold px-4 py-2 text-sm transition-colors"
+            className="rounded-md bg-gradient-to-r from-[#c5a35e] to-[#a8851f] hover:from-[#d4b06e] hover:to-[#b8951f] text-[#0a0e1a] font-semibold px-4 py-2 text-sm transition-all focus-visible:outline-2 focus-visible:outline-[#c5a35e] focus-visible:outline-offset-2"
           >
             Recalculate
           </button>
@@ -187,10 +202,10 @@ export default async function CreditPage({
 
         <div className="grid lg:grid-cols-5 gap-6">
           {/* Narrative */}
-          <div className="lg:col-span-3 rounded-xl border border-slate-800 bg-slate-900/60 p-6 space-y-5">
+          <div className="lg:col-span-3 card-surface p-6 space-y-5">
             {narrative.map((sec) => (
               <section key={sec.title}>
-                <h3 className="text-amber-300/90 font-medium mb-2">{sec.title}</h3>
+                <h3 className="text-[#e0c887] font-medium mb-2">{sec.title}</h3>
                 {sec.paragraphs.map((p, i) => (
                   <p key={i} className="text-slate-300 leading-relaxed mb-2 last:mb-0">
                     {p}
@@ -202,7 +217,7 @@ export default async function CreditPage({
 
           <div className="lg:col-span-2 space-y-6">
             {/* Credit metrics */}
-            <div className="rounded-xl border border-slate-800 bg-slate-900/60 overflow-hidden">
+            <div className="card-surface overflow-hidden">
               <h3 className="px-5 py-3 text-sm font-semibold text-slate-200 border-b border-slate-800 bg-slate-900">
                 Credit Metrics
               </h3>
@@ -212,7 +227,7 @@ export default async function CreditPage({
                     <tr key={mt.key} className="border-b border-slate-800/60 last:border-0">
                       <td className="px-5 py-2.5 text-slate-300">
                         {mt.label}
-                        <span className="block text-xs text-slate-500">{mt.benchmark}</span>
+                        <span className="block text-xs text-slate-400">{mt.benchmark}</span>
                       </td>
                       <td className={`px-5 py-2.5 text-right font-medium tabular-nums ${assessColor[mt.assessment]}`}>
                         {mt.display}
@@ -225,7 +240,7 @@ export default async function CreditPage({
 
             {/* Pro-forma */}
             {assessment.proForma && (
-              <div className="rounded-xl border border-slate-800 bg-slate-900/60 overflow-hidden">
+              <div className="card-surface overflow-hidden">
                 <h3 className="px-5 py-3 text-sm font-semibold text-slate-200 border-b border-slate-800 bg-slate-900">
                   Pro-Forma (facility fully drawn)
                 </h3>
@@ -234,14 +249,12 @@ export default async function CreditPage({
                     {[
                       { l: "Net Debt / EBITDA", b: fx(assessment.proForma.netDebtEbitda.before), a: fx(assessment.proForma.netDebtEbitda.after) },
                       { l: "Interest Coverage", b: fx(assessment.proForma.interestCoverage.before), a: fx(assessment.proForma.interestCoverage.after) },
-                      { l: "Debt / Equity", b: fx(assessment.proForma.debtToEquity.before, 2), a: fx(assessment.proForma.debtToEquity.after, 2) },
-                      { l: "Annual Debt Service", b: "—", a: money(assessment.proForma.annualDebtService, cur) },
-                      { l: "Pro-forma Cash DSCR", b: "—", a: fx(assessment.proForma.dscrProForma, 2) },
-                    ].map((r) => (
-                      <tr key={r.l} className="border-b border-slate-800/60 last:border-0">
-                        <td className="px-5 py-2.5 text-slate-300">{r.l}</td>
-                        <td className="px-3 py-2.5 text-right text-slate-500 tabular-nums">{r.b}</td>
-                        <td className="px-5 py-2.5 text-right font-medium text-slate-100 tabular-nums">{r.a}</td>
+                      { l: "DSCR", b: fx(assessment.proForma.dscr.before), a: fx(assessment.proForma.dscr.after) },
+                    ].map((row) => (
+                      <tr key={row.l} className="border-b border-slate-800/60 last:border-0">
+                        <td className="px-5 py-2.5 text-slate-300">{row.l}</td>
+                        <td className="px-3 py-2.5 text-right tabular-nums text-slate-400">{row.b}</td>
+                        <td className="px-5 py-2.5 text-right tabular-nums font-medium text-slate-200">→ {row.a}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -249,118 +262,68 @@ export default async function CreditPage({
               </div>
             )}
 
-            {/* Rating factors */}
-            <div className="rounded-xl border border-slate-800 bg-slate-900/60 overflow-hidden">
-              <h3 className="px-5 py-3 text-sm font-semibold text-slate-200 border-b border-slate-800 bg-slate-900">
-                Rating Factors
-              </h3>
-              <table className="w-full text-sm">
-                <tbody>
-                  {assessment.rating.factors.map((f) => (
-                    <tr key={f.factor} className="border-b border-slate-800/60 last:border-0">
-                      <td className="px-5 py-2.5 text-slate-300">
-                        {f.factor}
-                        <span className="block text-xs text-slate-500">{f.comment}</span>
-                      </td>
-                      <td className="px-5 py-2.5 text-right text-slate-400">{Math.round(f.weight * 100)}%</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            {/* Peer comparison */}
+            {peers.length > 0 && (
+              <div className="card-surface overflow-hidden">
+                <h3 className="px-5 py-3 text-sm font-semibold text-slate-200 border-b border-slate-800 bg-slate-900">
+                  Peer Comparison
+                </h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-xs uppercase tracking-wider text-slate-400">
+                        <th scope="col" className="px-5 py-2 text-left font-medium">Company</th>
+                        <th scope="col" className="px-3 py-2 text-right font-medium">ND/EBITDA</th>
+                        <th scope="col" className="px-3 py-2 text-right font-medium">Int. Cov.</th>
+                        <th scope="col" className="px-5 py-2 text-right font-medium">Rating</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {peers.map((p) => (
+                        <tr key={p.symbol} className="border-b border-slate-800/60 last:border-0">
+                          <td className="px-5 py-2 text-slate-200">
+                            <Link href={`/credit/${p.symbol}`} className="font-medium hover:text-[#e0c887]">{p.symbol}</Link>
+                            <span className="text-xs text-slate-400 ml-1.5 hidden lg:inline">{p.name}</span>
+                          </td>
+                          <td className="px-3 py-2 text-right tabular-nums text-slate-300">{fx(p.netDebtEbitda)}</td>
+                          <td className="px-3 py-2 text-right tabular-nums text-slate-300">{fx(p.interestCoverage)}</td>
+                          <td className="px-5 py-2 text-right">
+                            <span className={`font-medium ${p.grade <= 3 ? "text-emerald-300" : p.grade <= 5 ? "text-[#e0c887]" : "text-red-400"}`}>
+                              {p.grade}/10
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Peer availability note */}
-        {peers && peers.peers.some((p) => p.failed) && (
-          <p className="text-xs text-amber-400/80">
-            Peer data unavailable on the current FMP plan for:{" "}
-            {peers.peers.filter((p) => p.failed).map((p) => p.symbol).join(", ")}. The free tier
-            covers major large-caps only — try peers like MSFT, GOOGL, KO, JNJ, or upgrade the FMP
-            plan for full coverage.
-          </p>
-        )}
-
-        {/* Peer table */}
-        {peers && peers.peers.some((p) => !p.failed) && (
-          <div className="rounded-xl border border-slate-800 bg-slate-900/60 overflow-hidden">
-            <h3 className="px-5 py-3 text-sm font-semibold text-slate-200 border-b border-slate-800 bg-slate-900">
-              Peer Comparison
-            </h3>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-xs uppercase tracking-wider text-slate-500">
-                    <th className="px-5 py-2 text-left font-medium">Company</th>
-                    <th className="px-3 py-2 text-right font-medium">Revenue</th>
-                    <th className="px-3 py-2 text-right font-medium">EBITDA Mgn</th>
-                    <th className="px-3 py-2 text-right font-medium">Net Mgn</th>
-                    <th className="px-3 py-2 text-right font-medium">ROE</th>
-                    <th className="px-3 py-2 text-right font-medium">ND/EBITDA</th>
-                    <th className="px-3 py-2 text-right font-medium">Int. Cover</th>
-                    <th className="px-3 py-2 text-right font-medium">D/E</th>
-                    <th className="px-3 py-2 text-right font-medium">Curr. Ratio</th>
-                    <th className="px-3 py-2 text-right font-medium">FCF Mgn</th>
-                    <th className="px-5 py-2 text-right font-medium">Rev 3y</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {[{ ...peers.subject, companyName: `${profile.companyName} ★` }, ...peers.peers.filter((p) => !p.failed), { symbol: "MEDIAN", companyName: "Peer median", ...peers.median }].map(
-                    (p, idx) => (
-                      <tr
-                        key={p.symbol + idx}
-                        className={`border-t border-slate-800/60 ${idx === 0 ? "bg-amber-500/5" : p.symbol === "MEDIAN" ? "bg-slate-800/40 font-medium" : ""}`}
-                      >
-                        <td className="px-5 py-2.5 text-slate-200">
-                          {p.symbol === "MEDIAN" ? "Peer median" : `${p.companyName ?? p.symbol} (${p.symbol})`}
-                        </td>
-                        <td className="px-3 py-2.5 text-right tabular-nums text-slate-300">{money(p.revenue, cur)}</td>
-                        <td className="px-3 py-2.5 text-right tabular-nums text-slate-300">{fp(p.ebitdaMargin)}</td>
-                        <td className="px-3 py-2.5 text-right tabular-nums text-slate-300">{fp(p.netMargin)}</td>
-                        <td className="px-3 py-2.5 text-right tabular-nums text-slate-300">{fp(p.roe)}</td>
-                        <td className="px-3 py-2.5 text-right tabular-nums text-slate-300">{fx(p.netDebtEbitda)}</td>
-                        <td className="px-3 py-2.5 text-right tabular-nums text-slate-300">{fx(p.interestCoverage)}</td>
-                        <td className="px-3 py-2.5 text-right tabular-nums text-slate-300">{fx(p.debtToEquity, 2)}</td>
-                        <td className="px-3 py-2.5 text-right tabular-nums text-slate-300">{fx(p.currentRatio, 2)}</td>
-                        <td className="px-3 py-2.5 text-right tabular-nums text-slate-300">{fp(p.fcfMargin)}</td>
-                        <td className="px-5 py-2.5 text-right tabular-nums text-slate-300">{fp(p.revenueGrowth3y)}</td>
-                      </tr>
-                    )
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* Trend */}
-        <div className="rounded-xl border border-slate-800 bg-slate-900/60 overflow-hidden">
+        {/* Summary table */}
+        <div className="card-surface overflow-hidden">
           <h3 className="px-5 py-3 text-sm font-semibold text-slate-200 border-b border-slate-800 bg-slate-900">
-            Multi-Year Credit Trend
+            Financial Summary ({cur})
           </h3>
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-xs uppercase tracking-wider text-slate-500">
-                  <th className="px-5 py-2 text-left font-medium">FY</th>
-                  <th className="px-3 py-2 text-right font-medium">Revenue</th>
-                  <th className="px-3 py-2 text-right font-medium">EBITDA</th>
-                  <th className="px-3 py-2 text-right font-medium">ND/EBITDA</th>
-                  <th className="px-3 py-2 text-right font-medium">Int. Cover</th>
-                  <th className="px-3 py-2 text-right font-medium">OCF</th>
-                  <th className="px-5 py-2 text-right font-medium">FCF</th>
+                <tr className="text-xs uppercase tracking-wider text-slate-400">
+                  <th scope="col" className="px-5 py-2 text-left font-medium">Metric</th>
+                  {report.summary.years.map((y) => (
+                    <th key={y} scope="col" className="px-3 py-2 text-right font-medium">{y}</th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
-                {assessment.trend.map((t) => (
-                  <tr key={t.year} className="border-t border-slate-800/60">
-                    <td className="px-5 py-2.5 text-slate-200">{t.year}</td>
-                    <td className="px-3 py-2.5 text-right tabular-nums text-slate-300">{money(t.revenue, cur)}</td>
-                    <td className="px-3 py-2.5 text-right tabular-nums text-slate-300">{money(t.ebitda, cur)}</td>
-                    <td className="px-3 py-2.5 text-right tabular-nums text-slate-300">{fx(t.netDebtEbitda)}</td>
-                    <td className="px-3 py-2.5 text-right tabular-nums text-slate-300">{fx(t.interestCoverage)}</td>
-                    <td className="px-3 py-2.5 text-right tabular-nums text-slate-300">{money(t.ocf, cur)}</td>
-                    <td className="px-5 py-2.5 text-right tabular-nums text-slate-300">{money(t.fcf, cur)}</td>
+                {report.summary.rows.map((row) => (
+                  <tr key={row.label} className="border-t border-slate-800/60">
+                    <td className="px-5 py-2 text-slate-300">{row.label}</td>
+                    {row.values.map((v, i) => (
+                      <td key={i} className="px-3 py-2 text-right tabular-nums text-slate-200">{v ?? "—"}</td>
+                    ))}
                   </tr>
                 ))}
               </tbody>
@@ -368,8 +331,8 @@ export default async function CreditPage({
           </div>
         </div>
 
-        <p className="text-xs text-slate-600 pb-8">
-          Sunvera Analyst credit module · Data: Financial Modeling Prep · Internal use — not a commitment to lend, not investment advice.
+        <p className="text-xs text-slate-400 pb-4">
+          Generated {new Date(report.generatedAt).toLocaleString()} · Internal use only · Not investment advice.
         </p>
       </div>
     </main>

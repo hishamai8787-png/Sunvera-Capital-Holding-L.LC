@@ -1,8 +1,14 @@
 import TVWidget from "@/components/tv/TVWidget";
 import Watchlist from "@/components/Watchlist";
 import MarketNews from "@/components/MarketNews";
+import type { Metadata } from "next";
 
-export const metadata = { title: "Markets — Sunvera Capital" };
+export const metadata: Metadata = {
+  title: "Markets — Live Data Hub",
+  description:
+    "Live market data: indices, bonds, FX, commodities, S&P 500 sector heatmap, forex cross rates, real-time watchlist, and streaming financial news.",
+  alternates: { canonical: "https://sunveracapital.com/markets" },
+};
 
 const tvTheme = {
   colorTheme: "dark",

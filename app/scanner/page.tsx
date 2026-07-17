@@ -1,8 +1,15 @@
 import Link from "next/link";
 import { loadLastScan } from "@/lib/scanner";
 import ScanRunner from "@/components/ScanRunner";
+import type { Metadata } from "next";
 
-export const metadata = { title: "Scanner — Sunvera Capital" };
+export const metadata: Metadata = {
+  title: "Opportunity Scanner",
+  description:
+    "Run the full Sunvera Capital framework over the investable universe. Flags names worth a closer look with reasons — not just rankings.",
+  alternates: { canonical: "https://sunveracapital.com/scanner" },
+};
+
 export const dynamic = "force-dynamic";
 
 export default async function ScannerPage() {
@@ -13,7 +20,7 @@ export default async function ScannerPage() {
   return (
     <main className="text-slate-100">
       <div className="max-w-5xl mx-auto px-6 py-8 space-y-6">
-        <div className="rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-900 to-slate-900/40 p-5 space-y-4">
+        <div className="card-surface bg-gradient-to-r from-slate-900 to-slate-900/40 p-5 space-y-4">
           <div>
             <p className="text-xs tracking-[0.3em] uppercase text-[#c5a35e]">Sunvera Capital</p>
             <h1 className="text-2xl font-semibold mt-0.5">Opportunity Scanner</h1>
@@ -48,7 +55,7 @@ export default async function ScannerPage() {
                   {flagged.map((o) => (
                     <div
                       key={o.symbol}
-                      className="rounded-xl border border-[#c5a35e]/25 bg-[#c5a35e]/5 p-5"
+                      className="rounded-xl border border-[#c5a35e]/25 bg-[#c5a35e]/5 p-5 hover:shadow-md hover:shadow-[#c5a35e]/5 transition-shadow"
                     >
                       <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
                         <div>

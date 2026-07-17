@@ -12,7 +12,7 @@ const verdictDot: Record<Verdict, string> = {
   strong: "bg-emerald-400",
   good: "bg-emerald-600",
   neutral: "bg-slate-500",
-  weak: "bg-amber-500",
+  weak: "bg-[#c5a35e]",
   poor: "bg-red-500",
   na: "bg-slate-700",
 };
@@ -21,9 +21,9 @@ const verdictText: Record<Verdict, string> = {
   strong: "text-emerald-300",
   good: "text-emerald-400",
   neutral: "text-slate-300",
-  weak: "text-amber-400",
+  weak: "text-[#e0c887]",
   poor: "text-red-400",
-  na: "text-slate-500",
+  na: "text-slate-400",
 };
 
 function ScoreGauge({ total }: { total: number }) {
@@ -31,9 +31,9 @@ function ScoreGauge({ total }: { total: number }) {
   const c = 2 * Math.PI * r;
   const filled = (total / 100) * c * 0.75; // 270° arc
   const track = c * 0.75;
-  const color = total >= 80 ? "#6ee7b7" : total >= 60 ? "#fbbf24" : "#f87171";
+  const color = total >= 80 ? "#6ee7b7" : total >= 60 ? "#c5a35e" : "#f87171";
   return (
-    <svg viewBox="0 0 128 128" className="w-32 h-32">
+    <svg viewBox="0 0 128 128" className="w-32 h-32" role="img" aria-label={`Sunvera Score: ${total} out of 100`}>
       <g transform="rotate(135 64 64)">
         <circle
           cx="64" cy="64" r={r} fill="none" stroke="#1e293b" strokeWidth="10"
@@ -63,11 +63,11 @@ export function ScoreCard({ report }: { report: AnalysisReport }) {
       : score.total >= 70
         ? "text-emerald-400"
         : score.total >= 60
-          ? "text-amber-300"
+          ? "text-[#e0c887]"
           : "text-red-400";
 
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-6">
+    <div className="card-surface p-6">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="text-lg font-semibold text-slate-200">
@@ -88,8 +88,8 @@ export function ScoreCard({ report }: { report: AnalysisReport }) {
             </div>
             <div className="h-1.5 rounded-full bg-slate-800">
               <div
-                className="h-1.5 rounded-full bg-amber-400/90"
-                style={{ width: `${Math.min(100, (b.earned / b.weight) * 100)}%` }}
+                className="h-1.5 rounded-full bg-gradient-to-r from-[#c5a35e] to-[#e0c887]"
+                style={{ width: `${Math.min(100, (b.earned / b.weight) * 100)}%`, transition: "width 0.4s ease" }}
               />
             </div>
           </div>
@@ -113,10 +113,10 @@ export function QuickStats({ report }: { report: AnalysisReport }) {
     altman.zone === "safe"
       ? "text-emerald-300"
       : altman.zone === "grey"
-        ? "text-amber-300"
+        ? "text-[#e0c887]"
         : altman.zone === "distress"
           ? "text-red-400"
-          : "text-slate-500";
+          : "text-slate-400";
   const mos = dcf.marginOfSafety;
 
   const stats = [
@@ -134,7 +134,7 @@ export function QuickStats({ report }: { report: AnalysisReport }) {
         piotroski.score >= 7
           ? "text-emerald-300"
           : piotroski.score >= 4
-            ? "text-amber-300"
+            ? "text-[#e0c887]"
             : "text-red-400",
     },
     {
@@ -150,11 +150,11 @@ export function QuickStats({ report }: { report: AnalysisReport }) {
       sub: mos !== null ? (mos >= 0.25 ? "Undervalued" : mos >= 0 ? "Fairly valued" : "Premium") : "",
       color:
         mos === null
-          ? "text-slate-500"
+          ? "text-slate-400"
           : mos >= 0.25
             ? "text-emerald-300"
             : mos >= 0
-              ? "text-amber-300"
+              ? "text-[#e0c887]"
               : "text-red-400",
     },
   ];
@@ -162,9 +162,9 @@ export function QuickStats({ report }: { report: AnalysisReport }) {
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
       {stats.map((s) => (
-        <div key={s.label} className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-          <div className="text-xs uppercase tracking-wider text-slate-500 mb-1">{s.label}</div>
-          <div className={`text-2xl font-semibold ${s.color}`}>{s.value}</div>
+        <div key={s.label} className="card-surface p-4 hover:border-slate-700 transition-colors">
+          <div className="text-xs uppercase tracking-wider text-slate-400 mb-1">{s.label}</div>
+          <div className={`text-2xl font-semibold tabular-nums ${s.color}`}>{s.value}</div>
           <div className="text-xs text-slate-400 mt-0.5">{s.sub}</div>
         </div>
       ))}
@@ -174,19 +174,19 @@ export function QuickStats({ report }: { report: AnalysisReport }) {
 
 export function RatioTable({ category }: { category: MetricCategory }) {
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/60 overflow-hidden">
+    <div className="card-surface overflow-hidden">
       <h3 className="px-5 py-3 text-sm font-semibold text-slate-200 border-b border-slate-800 bg-slate-900">
         {category.label}
       </h3>
       <table className="w-full text-sm">
         <tbody>
           {category.metrics.map((mt: Metric) => (
-            <tr key={mt.key} className="border-b border-slate-800/60 last:border-0">
+            <tr key={mt.key} className="border-b border-slate-800/60 last:border-0 hover:bg-slate-800/30 transition-colors">
               <td className="px-5 py-2.5 text-slate-300">
                 <span className={`inline-block w-2 h-2 rounded-full mr-2.5 ${verdictDot[mt.verdict]}`} />
                 {mt.label}
                 {mt.note && (
-                  <span className="block text-xs text-slate-500 ml-[18px]">{mt.note}</span>
+                  <span className="block text-xs text-slate-400 ml-[18px]">{mt.note}</span>
                 )}
               </td>
               <td className={`px-5 py-2.5 text-right font-medium tabular-nums ${verdictText[mt.verdict]}`}>
@@ -203,28 +203,28 @@ export function RatioTable({ category }: { category: MetricCategory }) {
 const gpct = (v: number | null) =>
   v === null ? "—" : `${v >= 0 ? "+" : ""}${(v * 100).toFixed(1)}%`;
 const gcolor = (v: number | null) =>
-  v === null ? "text-slate-600" : v >= 0 ? "text-emerald-400" : "text-red-400";
+  v === null ? "text-slate-400" : v >= 0 ? "text-emerald-400" : "text-red-400";
 
 export function GrowthTable({ growth }: { growth: GrowthRow[] }) {
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/60 overflow-hidden">
+    <div className="card-surface overflow-hidden">
       <h3 className="px-5 py-3 text-sm font-semibold text-slate-200 border-b border-slate-800 bg-slate-900">
         Growth &amp; CAGR
       </h3>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-xs uppercase tracking-wider text-slate-500">
-              <th className="px-5 py-2 text-left font-medium">Metric</th>
-              <th className="px-3 py-2 text-right font-medium">YoY</th>
-              <th className="px-3 py-2 text-right font-medium">3y CAGR</th>
-              <th className="px-3 py-2 text-right font-medium">5y CAGR</th>
-              <th className="px-5 py-2 text-right font-medium">10y CAGR</th>
+            <tr className="text-xs uppercase tracking-wider text-slate-400">
+              <th scope="col" className="px-5 py-2 text-left font-medium">Metric</th>
+              <th scope="col" className="px-3 py-2 text-right font-medium">YoY</th>
+              <th scope="col" className="px-3 py-2 text-right font-medium">3y CAGR</th>
+              <th scope="col" className="px-3 py-2 text-right font-medium">5y CAGR</th>
+              <th scope="col" className="px-5 py-2 text-right font-medium">10y CAGR</th>
             </tr>
           </thead>
           <tbody>
             {growth.map((g) => (
-              <tr key={g.metric} className="border-t border-slate-800/60">
+              <tr key={g.metric} className="border-t border-slate-800/60 hover:bg-slate-800/30 transition-colors">
                 <td className="px-5 py-2.5 text-slate-300">{g.metric}</td>
                 <td className={`px-3 py-2.5 text-right tabular-nums ${gcolor(g.yoy)}`}>{gpct(g.yoy)}</td>
                 <td className={`px-3 py-2.5 text-right tabular-nums ${gcolor(g.cagr3)}`}>{gpct(g.cagr3)}</td>
@@ -241,11 +241,11 @@ export function GrowthTable({ growth }: { growth: GrowthRow[] }) {
 
 export function Narrative({ report }: { report: AnalysisReport }) {
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-6 space-y-6">
+    <div className="card-surface p-6 space-y-6">
       <h2 className="text-lg font-semibold text-slate-200">Analysis</h2>
       {report.narrative.map((sec) => (
         <section key={sec.title}>
-          <h3 className="text-amber-300/90 font-medium mb-2">{sec.title}</h3>
+          <h3 className="text-[#e0c887] font-medium mb-2">{sec.title}</h3>
           {sec.paragraphs.map((p, i) => (
             <p key={i} className="text-slate-300 leading-relaxed mb-2 last:mb-0">
               {p}
@@ -260,7 +260,7 @@ export function Narrative({ report }: { report: AnalysisReport }) {
 export function NewsList({ report }: { report: AnalysisReport }) {
   if (!report.news.length) return null;
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-6">
+    <div className="card-surface p-6">
       <h2 className="text-lg font-semibold text-slate-200 mb-4">Recent News</h2>
       <ul className="space-y-3">
         {report.news.map((n, i) => (
@@ -269,11 +269,11 @@ export function NewsList({ report }: { report: AnalysisReport }) {
               href={n.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-slate-200 hover:text-amber-300 transition-colors"
+              className="text-slate-200 hover:text-[#e0c887] transition-colors focus-visible:outline-2 focus-visible:outline-[#c5a35e] focus-visible:outline-offset-2"
             >
               {n.headline}
             </a>
-            <div className="text-xs text-slate-500">
+            <div className="text-xs text-slate-400">
               {n.source} · {new Date(n.datetime * 1000).toLocaleDateString()}
             </div>
           </li>

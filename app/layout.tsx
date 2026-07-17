@@ -14,13 +14,122 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
-});
+]);
+
+const siteUrl = "https://sunveracapital.com";
 
 export const metadata: Metadata = {
-  title: "Sunvera Capital | Institutional Equity & Credit Intelligence",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: "Sunvera Capital | Institutional Equity & Credit Intelligence",
+    template: "%s | Sunvera Capital",
+  },
   description:
-    "Institutional-grade equity analysis, credit proposals, and live market data — built on the Sunvera Capital framework.",
-  keywords: ["equity analysis", "credit intelligence", "market scanner", "portfolio management", "MENA finance"],
+    "Institutional-grade equity analysis, credit proposals, and live market data — 100+ ratios, Altman Z, Piotroski F, DCF fair value, and bank-grade credit assessments with Word document export.",
+  keywords: [
+    "equity analysis",
+    "credit intelligence",
+    "credit proposal",
+    "market scanner",
+    "portfolio management",
+    "DCF valuation",
+    "Altman Z-Score",
+    "Piotroski F-Score",
+    "MENA finance",
+    "institutional research",
+    "financial analysis platform",
+    "Sunvera Capital",
+  ],
+  authors: [{ name: "Sunvera Capital Holding LLC" }],
+  creator: "Sunvera Capital Holding LLC",
+  publisher: "Sunvera Capital Holding LLC",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: siteUrl,
+    siteName: "Sunvera Capital",
+    title: "Sunvera Capital | Institutional Equity & Credit Intelligence",
+    description:
+      "Research any company like an institution — 100+ ratios, DCF fair value, bank-grade credit proposals, and live market data in seconds.",
+    images: [
+      {
+        url: "https://media.base44.com/images/public/6a58633ccc2190d9113b4aaa/b9c4cd9b6_generated_image.png",
+        width: 1200,
+        height: 630,
+        alt: "Sunvera Capital — Institutional Research Platform",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Sunvera Capital | Institutional Equity & Credit Intelligence",
+    description:
+      "Research any company like an institution — 100+ ratios, DCF, credit proposals, and live market data in seconds.",
+    images: [
+      "https://media.base44.com/images/public/6a58633ccc2190d9113b4aaa/b9c4cd9b6_generated_image.png",
+    ],
+  },
+  icons: {
+    icon: "/favicon.ico",
+  },
+  alternates: {
+    canonical: siteUrl,
+  },
+  category: "finance",
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Sunvera Capital Holding LLC",
+  description:
+    "Institutional-grade equity analysis, credit proposals, and live market data platform.",
+  url: siteUrl,
+  founder: {
+    "@type": "Person",
+    name: "Hisham Al-Sayed",
+    jobTitle: "Founder & CIO",
+  },
+  knowsAbout: [
+    "Equity Analysis",
+    "Credit Intelligence",
+    "DCF Valuation",
+    "Altman Z-Score",
+    "Piotroski F-Score",
+    "Portfolio Management",
+    "MENA Finance",
+  ],
+};
+
+const webAppJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: "Sunvera Capital",
+  applicationCategory: "FinanceApplication",
+  operatingSystem: "Web",
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "USD",
+  },
+  description:
+    "Institutional-grade equity analysis, credit proposals, and live market data — 100+ ratios, DCF fair value, and bank-grade credit assessments.",
+  url: siteUrl,
+  publisher: {
+    "@type": "Organization",
+    name: "Sunvera Capital Holding LLC",
+  },
 };
 
 export default function RootLayout({
@@ -33,6 +142,16 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppJsonLd) }}
+        />
+      </head>
       <body className="min-h-full flex flex-col bg-[#0a0e1a] text-slate-100">
         <SessionProvider>
         <CurrencyProvider>

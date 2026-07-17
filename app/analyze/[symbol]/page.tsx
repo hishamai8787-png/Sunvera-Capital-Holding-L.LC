@@ -10,15 +10,17 @@ import {
   Narrative,
   NewsList,
 } from "@/components/report";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
 
-export async function generateMetadata({ params }: { params: Promise<{ symbol: string }> }) {
+export async function generateMetadata({ params }: { params: Promise<{ symbol: string }> }): Promise<Metadata> {
   const { symbol } = await params;
   const sym = decodeURIComponent(symbol).toUpperCase();
   return {
-    title: `${sym} — Equity Analysis | Sunvera Capital`,
-    description: `Institutional-grade equity analysis for ${sym}: 100+ ratios, scoring, DCF, and narrative.`,
+    title: `${sym} — Equity Analysis`,
+    description: `Institutional-grade equity analysis for ${sym}: 100+ ratios, Altman Z-Score, Piotroski F-Score, DCF fair value, and narrative insights.`,
+    alternates: { canonical: `https://sunveracapital.com/analyze/${sym}` },
   };
 }
 
@@ -63,45 +65,47 @@ export default async function AnalyzePage({
     <main className="text-slate-100">
       <div className="max-w-6xl mx-auto px-6 py-8 space-y-6">
         {/* Header */}
-        <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-900 to-slate-900/40 p-5">
-          <div className="flex items-center gap-4 min-w-0">
-            {profile.image && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={profile.image}
-                alt={`${profile.companyName} logo`}
-                className="w-14 h-14 rounded-xl bg-white/90 p-1.5 object-contain shrink-0"
-              />
-            )}
-            <div className="min-w-0">
-              <h1 className="text-2xl sm:text-3xl font-semibold truncate">
-                {profile.companyName}{" "}
-                <span className="text-slate-500 text-lg sm:text-xl">({report.symbol})</span>
-              </h1>
-              <p className="text-sm text-slate-400 mt-0.5 truncate">
-                {profile.exchange} · {profile.sector} · {profile.industry}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-5">
-            <div className="text-right">
-              <div className="text-3xl font-semibold tabular-nums">
-                ${quote.price?.toFixed(2)}
+        <div className="card-surface bg-gradient-to-r from-slate-900 to-slate-900/40 p-5">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-4 min-w-0">
+              {profile.image && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={profile.image}
+                  alt={`${profile.companyName} logo`}
+                  className="w-14 h-14 rounded-xl bg-white/90 p-1.5 object-contain shrink-0"
+                />
+              )}
+              <div className="min-w-0">
+                <h1 className="text-2xl sm:text-3xl font-semibold truncate">
+                  {profile.companyName}{" "}
+                  <span className="text-slate-500 text-lg sm:text-xl">({report.symbol})</span>
+                </h1>
+                <p className="text-sm text-slate-400 mt-0.5 truncate">
+                  {profile.exchange} · {profile.sector} · {profile.industry}
+                </p>
               </div>
-              <div
-                className={`text-sm font-medium tabular-nums ${chg >= 0 ? "text-emerald-400" : "text-red-400"}`}
-                aria-label={`Price change: ${chg >= 0 ? "up" : "down"} ${Math.abs(chg).toFixed(2)} percent`}
+            </div>
+            <div className="flex items-center gap-5">
+              <div className="text-right">
+                <div className="text-3xl font-semibold tabular-nums">
+                  ${quote.price?.toFixed(2)}
+                </div>
+                <div
+                  className={`text-sm font-medium tabular-nums ${chg >= 0 ? "text-emerald-400" : "text-red-400"}`}
+                  aria-label={`Price change: ${chg >= 0 ? "up" : "down"} ${Math.abs(chg).toFixed(2)} percent`}
+                >
+                  <span aria-hidden="true">{chg >= 0 ? "▲" : "▼"}</span> {chg >= 0 ? "+" : ""}
+                  {chg.toFixed(2)}% today
+                </div>
+              </div>
+              <Link
+                href={`/credit/${report.symbol}`}
+                className="rounded-xl bg-gradient-to-r from-[#c5a35e] to-[#a8851f] hover:from-[#d4b06e] hover:to-[#b8951f] text-[#0a0e1a] font-semibold px-4 py-2.5 text-sm shadow-lg shadow-[#c5a35e]/10 transition-all focus-visible:outline-2 focus-visible:outline-[#c5a35e] focus-visible:outline-offset-2"
               >
-                <span aria-hidden="true">{chg >= 0 ? "▲" : "▼"}</span> {chg >= 0 ? "+" : ""}
-                {chg.toFixed(2)}% today
-              </div>
+                <span aria-hidden="true">🏦</span> Credit proposal
+              </Link>
             </div>
-            <Link
-              href={`/credit/${report.symbol}`}
-              className="rounded-xl bg-gradient-to-r from-[#c5a35e] to-[#a8851f] hover:from-[#d4b06e] hover:to-[#b8951f] text-[#0a0e1a] font-semibold px-4 py-2.5 text-sm shadow-lg shadow-[#c5a35e]/10 transition-all focus-visible:outline-2 focus-visible:outline-[#c5a35e] focus-visible:outline-offset-2"
-            >
-              <span aria-hidden="true">🏦</span> Credit proposal
-            </Link>
           </div>
         </div>
 

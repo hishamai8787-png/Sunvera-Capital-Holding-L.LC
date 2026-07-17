@@ -39,29 +39,33 @@ export default function ScanRunner({ lastRun }: { lastRun: string | null }) {
         <button
           onClick={run}
           disabled={busy}
-          className="rounded-lg bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 font-semibold px-4 py-2 text-sm"
+          aria-busy={busy}
+          className="rounded-lg bg-gradient-to-r from-[#c5a35e] to-[#a8851f] hover:from-[#d4b06e] hover:to-[#b8951f] disabled:opacity-50 text-[#0a0e1a] font-semibold px-4 py-2 text-sm transition-all focus-visible:outline-2 focus-visible:outline-[#c5a35e] focus-visible:outline-offset-2"
         >
-          {busy ? "Scanning…" : "🔎 Run scan"}
+          {busy ? "Scanning…" : (<><span aria-hidden="true">🔎</span> Run scan</>)}
         </button>
         <input
           value={extra}
           onChange={(e) => setExtra(e.target.value)}
           placeholder="Extra symbols (e.g. PEP, ADBE)"
-          className="flex-1 min-w-44 max-w-xs rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-slate-100 outline-none focus:border-amber-400"
+          aria-label="Extra ticker symbols to include in scan"
+          className="flex-1 min-w-44 max-w-xs rounded-md bg-slate-800 border border-slate-700 px-3 py-2 text-sm text-slate-100 outline-none focus:border-[#c5a35e] focus-visible:outline-1 focus-visible:outline-[#c5a35e]"
         />
         {lastRun && (
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-slate-400">
             Last scan: {new Date(lastRun).toLocaleString()}
           </span>
         )}
       </div>
-      {busy && (
-        <p className="text-xs text-slate-500 mt-2">
-          Analyzing ~30 companies through the full engine — first run takes a few minutes; repeats
-          within the hour are cached and fast.
-        </p>
-      )}
-      {error && <p className="text-sm text-red-400 mt-2">{error}</p>}
+      <div aria-live="polite">
+        {busy && (
+          <p className="text-xs text-slate-400 mt-2">
+            Analyzing ~30 companies through the full engine — first run takes a few minutes; repeats
+            within the hour are cached and fast.
+          </p>
+        )}
+        {error && <p className="text-sm text-red-400 mt-2" role="alert">{error}</p>}
+      </div>
     </div>
   );
 }

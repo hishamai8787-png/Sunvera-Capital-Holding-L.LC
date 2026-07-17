@@ -1,8 +1,15 @@
 import { loadTrades } from "@/lib/trades";
 import { buildPlaybook, type SegmentStats } from "@/lib/playbook";
 import TradeImport from "@/components/TradeImport";
+import type { Metadata } from "next";
 
-export const metadata = { title: "Playbooks — Sunvera Capital" };
+export const metadata: Metadata = {
+  title: "Trade Playbooks",
+  description:
+    "Historical trade analysis by sector, asset class, market, and year. Hit rate, average return, P&L, and narrative insights from your trading history.",
+  alternates: { canonical: "https://sunveracapital.com/playbooks" },
+};
+
 export const dynamic = "force-dynamic";
 
 const pct = (v: number | null, d = 1) => (v === null ? "—" : `${(v * 100).toFixed(d)}%`);
@@ -19,7 +26,7 @@ const pnlColor = (v: number | null) =>
 
 function SegmentCard({ s }: { s: SegmentStats }) {
   return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-5">
+    <div className="card-surface p-5 hover:border-slate-700 transition-colors">
       <div className="flex items-baseline justify-between mb-2">
         <h3 className="font-semibold text-slate-100">{s.segment}</h3>
         <span className={`font-semibold tabular-nums ${pnlColor(s.totalPnl)}`}>
@@ -66,7 +73,7 @@ export default async function PlaybooksPage() {
     <main className="text-slate-100">
       <div className="max-w-6xl mx-auto px-6 py-8 space-y-8">
         {/* Header */}
-        <div className="rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-900 to-slate-900/40 p-5 space-y-4">
+        <div className="card-surface bg-gradient-to-r from-slate-900 to-slate-900/40 p-5 space-y-4">
           <div>
             <p className="text-xs tracking-[0.3em] uppercase text-[#c5a35e]">Sunvera Capital</p>
             <h1 className="text-2xl font-semibold mt-0.5">Trade Playbooks</h1>
@@ -101,7 +108,7 @@ export default async function PlaybooksPage() {
                 { label: "Median Return", value: pct(pb.overall.medianReturn), color: pnlColor(pb.overall.medianReturn) },
                 { label: "Total P&L", value: money(pb.overall.totalPnl), color: pnlColor(pb.overall.totalPnl) },
               ].map((s) => (
-                <div key={s.label} className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+                <div key={s.label} className="card-surface p-4">
                   <div className="text-xs uppercase tracking-wider text-slate-400 mb-1">{s.label}</div>
                   <div className={`text-2xl font-semibold tabular-nums ${s.color}`}>{s.value}</div>
                 </div>
@@ -128,7 +135,7 @@ export default async function PlaybooksPage() {
               <h2 className="text-sm font-semibold text-slate-200 mb-3">
                 Trade Log <span className="text-slate-400 font-normal">({trades.length})</span>
               </h2>
-              <div className="rounded-xl border border-slate-800 bg-slate-900/60 overflow-hidden">
+              <div className="card-surface overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <caption className="sr-only">
@@ -151,7 +158,7 @@ export default async function PlaybooksPage() {
                       {[...trades]
                         .sort((a, b) => b.dateOpened.localeCompare(a.dateOpened))
                         .map((t) => (
-                          <tr key={t.id} className="border-t border-slate-800/60">
+                          <tr key={t.id} className="border-t border-slate-800/60 hover:bg-slate-800/30 transition-colors">
                             <td className="px-4 py-2 text-slate-400 whitespace-nowrap">{t.dateOpened}</td>
                             <td className="px-3 py-2 text-slate-400 whitespace-nowrap">
                               {t.dateClosed ?? <span className="text-[#c5a35e]">open</span>}

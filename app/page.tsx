@@ -1,5 +1,6 @@
 import Link from "next/link";
 import TickerSearch from "@/components/TickerSearch";
+import type { Metadata } from "next";
 
 const EXAMPLES = ["AAPL", "MSFT", "NKE", "JNJ", "KO", "GOOGL"];
 
@@ -27,17 +28,24 @@ const MODULES = [
   },
 ];
 
+export const metadata: Metadata = {
+  title: "Sunvera Capital | Institutional Equity & Credit Intelligence",
+  description:
+    "Research any company like an institution — 100+ financial ratios, Altman Z-Score, Piotroski F-Score, DCF fair value, bank-grade credit proposals, and live market data in seconds.",
+  alternates: { canonical: "https://sunveracapital.com" },
+};
+
 export default function Home() {
   return (
     <main className="relative overflow-hidden">
       {/* Ambient glow */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[500px] rounded-full bg-amber-500/10 blur-3xl"
+        className="pointer-events-none absolute -top-40 left-1/2 -translate-x-1/2 w-[800px] h-[500px] rounded-full bg-[#c5a35e]/8 blur-3xl"
       />
 
       <div className="relative max-w-5xl mx-auto px-6 pt-20 pb-16 text-center">
-        <p className="text-xs tracking-[0.35em] uppercase text-amber-400/80 mb-4">
+        <p className="text-xs tracking-[0.35em] uppercase text-[#c5a35e] mb-4">
           Sunvera Capital
         </p>
         <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight mb-4">
@@ -48,7 +56,7 @@ export default function Home() {
         </h1>
 
         <div className="max-w-xl mx-auto mt-8">
-          <TickerSearch size="lg" autoFocus placeholder="Try “Apple”, “Microsoft”, or a ticker…" />
+          <TickerSearch size="lg" autoFocus placeholder="Try \"Apple\", \"Microsoft\", or a ticker…" />
         </div>
 
         <div className="mt-5 flex flex-wrap justify-center gap-2" aria-label="Example tickers">
@@ -71,7 +79,7 @@ export default function Home() {
               key={mod.title}
               href={mod.href}
               aria-label={`${mod.title}: ${mod.cta}`}
-              className="group rounded-2xl border border-slate-800 bg-slate-900/50 p-6 hover:border-[#c5a35e]/50 hover:bg-slate-900 hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-2 focus-visible:outline-[#c5a35e] focus-visible:outline-offset-2"
+              className="group card-surface p-6 hover:border-[#c5a35e]/40 hover:shadow-lg hover:shadow-[#c5a35e]/5 hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-2 focus-visible:outline-[#c5a35e] focus-visible:outline-offset-2"
             >
               <div className="text-3xl mb-3" aria-hidden="true">{mod.icon}</div>
               <h2 className="font-semibold text-slate-100 mb-2">{mod.title}</h2>

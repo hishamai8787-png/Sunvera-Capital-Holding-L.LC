@@ -34,8 +34,8 @@ export default function TradingViewChart({ symbol }: { symbol: string }) {
   }, [symbol]);
 
   return (
-    <div className="h-[480px] rounded-xl overflow-hidden border border-slate-800">
+    <section aria-label={`TradingView chart for ${symbol}`} className="h-[480px] rounded-xl overflow-hidden border border-slate-800">
       <div ref={container} className="tradingview-widget-container h-full w-full" />
-    </div>
+    </section>
   );
 }
