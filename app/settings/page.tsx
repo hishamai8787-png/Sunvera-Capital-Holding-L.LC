@@ -8,6 +8,7 @@ export default function SettingsPage() {
   const [defaultTicker, setDefaultTicker] = useState("");
   const [saved, setSaved] = useState(false);
   const [loaded, setLoaded] = useState(false);
+  const [exporting, setExporting] = useState<string | null>(null);
 
   // Load from localStorage on mount
   if (!loaded && typeof window !== "undefined") {
@@ -31,6 +32,26 @@ export default function SettingsPage() {
     }
   }, []);
 
+  const handleExport = useCallback(async (type: string, format: string) => {
+    setExporting(`${type}-${format}`);
+    try {
+      const res = await fetch(`/api/export?type=${type}&format=${format}`);
+      if (res.ok) {
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `${type}.${format === "csv" ? "csv" : "json"}`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+    } catch {
+      // ignore
+    } finally {
+      setExporting(null);
+    }
+  }, []);
+
   return (
     <main className="text-slate-100">
       <div className="max-w-2xl mx-auto px-6 py-16">
@@ -50,6 +71,7 @@ export default function SettingsPage() {
             <select
               value={currency}
               onChange={(e) => setCurrency(e.target.value)}
+              aria-label="Display currency"
               className="w-full rounded-lg bg-slate-800/80 border border-slate-700 px-4 py-2.5 text-slate-100 outline-none focus:border-[#c5a35e] cursor-pointer"
             >
               <option value="USD">USD — US Dollar</option>
@@ -72,6 +94,7 @@ export default function SettingsPage() {
               onChange={(e) => setDefaultTicker(e.target.value.toUpperCase().slice(0, 6))}
               placeholder="e.g. AAPL"
               maxLength={6}
+              aria-label="Default ticker symbol"
               className="w-full rounded-lg bg-slate-800/80 border border-slate-700 px-4 py-2.5 text-slate-100 outline-none focus:border-[#c5a35e] uppercase"
             />
           </div>
@@ -87,6 +110,47 @@ export default function SettingsPage() {
             >
               Clear Watchlist
             </button>
+          </div>
+
+          <div className="card-surface rounded-xl p-6">
+            <h2 className="text-lg font-semibold mb-2">Data Export</h2>
+            <p className="text-sm text-slate-400 mb-4">
+              Download your client data and trade history in JSON or CSV format.
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => handleExport("clients", "json")}
+                disabled={exporting === "clients-json"}
+                aria-busy={exporting === "clients-json"}
+                className="rounded-lg border border-slate-700 hover:border-[#c5a35e] text-slate-200 font-medium px-4 py-2.5 transition-colors text-sm disabled:opacity-50"
+              >
+                {exporting === "clients-json" ? "Exporting..." : "Clients (JSON)"}
+              </button>
+              <button
+                onClick={() => handleExport("clients", "csv")}
+                disabled={exporting === "clients-csv"}
+                aria-busy={exporting === "clients-csv"}
+                className="rounded-lg border border-slate-700 hover:border-[#c5a35e] text-slate-200 font-medium px-4 py-2.5 transition-colors text-sm disabled:opacity-50"
+              >
+                {exporting === "clients-csv" ? "Exporting..." : "Clients (CSV)"}
+              </button>
+              <button
+                onClick={() => handleExport("trades", "json")}
+                disabled={exporting === "trades-json"}
+                aria-busy={exporting === "trades-json"}
+                className="rounded-lg border border-slate-700 hover:border-[#c5a35e] text-slate-200 font-medium px-4 py-2.5 transition-colors text-sm disabled:opacity-50"
+              >
+                {exporting === "trades-json" ? "Exporting..." : "Trades (JSON)"}
+              </button>
+              <button
+                onClick={() => handleExport("trades", "csv")}
+                disabled={exporting === "trades-csv"}
+                aria-busy={exporting === "trades-csv"}
+                className="rounded-lg border border-slate-700 hover:border-[#c5a35e] text-slate-200 font-medium px-4 py-2.5 transition-colors text-sm disabled:opacity-50"
+              >
+                {exporting === "trades-csv" ? "Exporting..." : "Trades (CSV)"}
+              </button>
+            </div>
           </div>
 
           <div className="card-surface rounded-xl p-6">
