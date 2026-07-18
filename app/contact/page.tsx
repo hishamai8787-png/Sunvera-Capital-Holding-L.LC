@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import SocialLinks from "@/components/SocialLinks";
 
 export default function ContactPage() {
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
@@ -139,6 +140,15 @@ export default function ContactPage() {
             {status === "submitting" ? "Sending..." : "Send Message"}
           </button>
         </form>
+
+        {/* Social media section */}
+        <div className="mt-12 pt-8 border-t border-slate-800">
+          <h2 className="text-lg font-semibold text-slate-200 mb-2">Follow Sunvera Capital</h2>
+          <p className="text-sm text-slate-400 mb-5">
+            Stay connected for market insights, research updates, and institutional-grade analysis.
+          </p>
+          <SocialLinks variant="contact" />
+        </div>
       </section>
     </main>
   );

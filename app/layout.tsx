@@ -6,6 +6,7 @@ import TickerSearch from "@/components/TickerSearch";
 import CurrencyProvider, { CurrencySelect } from "@/components/CurrencyProvider";
 import MobileNav from "@/components/MobileNav";
 import { ToastProvider } from "@/components/Toast";
+import SocialLinks from "@/components/SocialLinks";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -111,6 +112,14 @@ const jsonLd = {
     "Piotroski F-Score",
     "Portfolio Management",
     "MENA Finance",
+  ],
+  sameAs: [
+    "https://twitter.com/SunveraCapital",
+    "https://linkedin.com/company/sunvera-capital",
+    "https://instagram.com/sunveracapital",
+    "https://facebook.com/sunveracapital",
+    "https://youtube.com/@sunveracapital",
+    "https://t.me/sunveracapital",
   ],
 };
 
@@ -253,21 +262,38 @@ export default function RootLayout({
         <div id="main-content" className="flex-1">{children}</div>
 
         {/* Global footer */}
-        <footer className="border-t border-[#1e293b]/80 py-6">
-          <div className="max-w-7xl mx-auto px-6 space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
-              <span>Sunvera Capital Holding LLC</span>
-              <span>
-                Data: Financial Modeling Prep &amp; Finnhub · Charts: TradingView · Research tool —
-                not investment advice
-              </span>
+        <footer className="border-t border-[#1e293b]/80 py-8">
+          <div className="max-w-7xl mx-auto px-6 space-y-6">
+            {/* Top row: brand + social */}
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-2.5">
+                <span className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#c5a35e] to-[#a8851f] flex items-center justify-center text-[#0a0e1a] font-black text-xs" aria-hidden="true">S</span>
+                <span className="font-semibold text-sm">Sunvera <span className="text-[#c5a35e]">Capital</span></span>
+              </div>
+              <SocialLinks variant="footer" />
             </div>
-            <nav className="flex flex-wrap gap-4 text-xs text-slate-500" aria-label="Legal links">
+
+            {/* Middle row: nav links */}
+            <nav className="flex flex-wrap gap-x-6 gap-y-2 text-xs text-slate-500" aria-label="Footer navigation">
               <Link href="/about" className="hover:text-[#c5a35e] transition-colors">About</Link>
               <Link href="/contact" className="hover:text-[#c5a35e] transition-colors">Contact</Link>
+              <Link href="/markets" className="hover:text-[#c5a35e] transition-colors">Markets</Link>
+              <Link href="/scanner" className="hover:text-[#c5a35e] transition-colors">Scanner</Link>
+              <Link href="/forex" className="hover:text-[#c5a35e] transition-colors">Forex</Link>
+              <Link href="/crypto" className="hover:text-[#c5a35e] transition-colors">Crypto</Link>
+              <Link href="/metals" className="hover:text-[#c5a35e] transition-colors">Metals</Link>
+              <Link href="/bonds" className="hover:text-[#c5a35e] transition-colors">Bonds</Link>
               <Link href="/terms" className="hover:text-[#c5a35e] transition-colors">Terms of Service</Link>
               <Link href="/privacy" className="hover:text-[#c5a35e] transition-colors">Privacy Policy</Link>
             </nav>
+
+            {/* Bottom row: copyright */}
+            <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400 border-t border-[#1e293b]/60 pt-4">
+              <span>© {new Date().getFullYear()} Sunvera Capital Holding LLC. All rights reserved.</span>
+              <span>
+                Data: FMP &amp; Finnhub · Charts: TradingView · Research tool — not investment advice
+              </span>
+            </div>
           </div>
         </footer>
         </CurrencyProvider>
