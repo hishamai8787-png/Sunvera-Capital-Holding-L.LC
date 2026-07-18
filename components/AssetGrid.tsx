@@ -15,8 +15,9 @@ interface Asset {
 
 interface AssetGridProps {
   type: "forex" | "crypto" | "metals" | "bonds";
-  title: string;
-  subtitle: string;
+  title?: string;
+  subtitle?: string;
+  hideHeader?: boolean;
 }
 
 const TV_SYMBOL_MAP: Record<string, string> = {
@@ -76,7 +77,7 @@ const TV_SYMBOL_MAP: Record<string, string> = {
   AU10Y: "TVC:AU10Y",
 };
 
-export default function AssetGrid({ type, title, subtitle }: AssetGridProps) {
+export default function AssetGrid({ type, title = "", subtitle = "", hideHeader = false }: AssetGridProps) {
   const [assets, setAssets] = useState<Asset[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<string>("all");
@@ -84,6 +85,7 @@ export default function AssetGrid({ type, title, subtitle }: AssetGridProps) {
 
   useEffect(() => {
     mountedRef.current = true;
+    
 
     const fetchData = async () => {
       if (!mountedRef.current) return;
@@ -102,6 +104,7 @@ export default function AssetGrid({ type, title, subtitle }: AssetGridProps) {
       }
     };
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchData();
     const interval = setInterval(fetchData, 60000);
 
@@ -127,91 +130,93 @@ export default function AssetGrid({ type, title, subtitle }: AssetGridProps) {
   }
 
   return (
-    <main className="text-slate-100">
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        <p className="text-xs tracking-[0.3em] uppercase text-[#c5a35e] mb-2">Sunvera Capital</p>
-        <h1 className="text-2xl font-semibold mb-1">{title}</h1>
-        <p className="text-sm text-slate-400 mb-6">{subtitle}</p>
+    <div>
+      {hideHeader ? null : (
+        <>
+          {title && <p className="text-xs tracking-[0.3em] uppercase text-[#c5a35e] mb-2">Sunvera Capital</p>}
+          {title && <h1 className="text-2xl font-semibold mb-1">{title}</h1>}
+          {subtitle && <p className="text-sm text-slate-400 mb-6">{subtitle}</p>}
+        </>
+      )}
 
-        {/* Category filter */}
-        {categories.length > 2 && (
-          <div className="flex flex-wrap gap-2 mb-6">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setFilter(cat)}
-                className={`text-xs rounded-full px-4 py-1.5 transition-colors ${
-                  filter === cat
-                    ? "bg-[#c5a35e]/15 text-[#e0c887] border border-[#c5a35e]/40"
-                    : "border border-slate-700 text-slate-400 hover:border-slate-600"
-                }`}
-              >
-                {cat === "all" ? "All" : cat}
-              </button>
-            ))}
-          </div>
-        )}
+      {/* Category filter */}
+      {categories.length > 2 && (
+        <div className="flex flex-wrap gap-2 mb-6">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setFilter(cat)}
+              className={`text-xs rounded-full px-4 py-1.5 transition-colors ${
+                filter === cat
+                  ? "bg-[#c5a35e]/15 text-[#e0c887] border border-[#c5a35e]/40"
+                  : "border border-slate-700 text-slate-400 hover:border-slate-600"
+              }`}
+            >
+              {cat === "all" ? "All" : cat}
+            </button>
+          ))}
+        </div>
+      )}
 
-        {loading && assets.length === 0 && (
-          <div role="status" aria-live="polite" className="text-center py-16">
-            <div className="inline-block w-8 h-8 border-2 border-[#c5a35e] border-t-transparent rounded-full animate-spin" />
-            <p className="mt-3 text-sm text-slate-400">Loading live {title.toLowerCase()} data…</p>
-          </div>
-        )}
+      {loading && assets.length === 0 && (
+        <div role="status" aria-live="polite" className="text-center py-16">
+          <div className="inline-block w-8 h-8 border-2 border-[#c5a35e] border-t-transparent rounded-full animate-spin" />
+          <p className="mt-3 text-sm text-slate-400">Loading live data…</p>
+        </div>
+      )}
 
-        {/* Asset cards grid */}
-        {!loading && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {filtered.map((a) => {
-              const tvSym = tvSymbol(a.symbol);
-              const isPositive = (a.changePercent ?? 0) > 0;
-              return (
-                <div key={a.symbol} className="card-surface rounded-xl p-4 hover:border-[#c5a35e]/30 transition-colors">
-                  <div className="flex items-start justify-between mb-3">
-                    <div>
-                      <div className="font-semibold text-slate-100">{a.label}</div>
-                      <div className="text-xs text-slate-500">{a.category} · {a.symbol}</div>
-                    </div>
-                    {a.changePercent != null && (
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded ${isPositive ? "text-green-400 bg-green-500/10" : "text-red-400 bg-red-500/10"}`}>
-                        {isPositive ? "▲" : "▼"} {Math.abs(a.changePercent).toFixed(2)}%
-                      </span>
-                    )}
+      {/* Asset cards grid */}
+      {!loading && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {filtered.map((a) => {
+            const tvSym = tvSymbol(a.symbol);
+            const isPositive = (a.changePercent ?? 0) > 0;
+            return (
+              <div key={a.symbol} className="card-surface rounded-xl p-4 hover:border-[#c5a35e]/30 transition-colors">
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <div className="font-semibold text-slate-100">{a.label}</div>
+                    <div className="text-xs text-slate-500">{a.category} · {a.symbol}</div>
                   </div>
-                  <div className="text-2xl font-bold tabular-nums text-slate-100">
-                    {formatPrice(a.price)}
-                  </div>
-                  {a.change != null && (
-                    <div className={`text-xs mt-1 tabular-nums ${isPositive ? "text-green-400" : "text-red-400"}`}>
-                      {isPositive ? "+" : ""}{a.change.toFixed(type === "bonds" ? 3 : 4)}
-                    </div>
+                  {a.changePercent != null && (
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded ${isPositive ? "text-green-400 bg-green-500/10" : "text-red-400 bg-red-500/10"}`}>
+                      {isPositive ? "▲" : "▼"} {Math.abs(a.changePercent).toFixed(2)}%
+                    </span>
                   )}
-                  {a.yearHigh != null && a.yearLow != null && (
-                    <div className="text-xs text-slate-500 mt-2">
-                      Range: {formatPrice(a.yearLow)} – {formatPrice(a.yearHigh)}
-                    </div>
-                  )}
-                  {/* TradingView mini chart link */}
-                  <a
-                    href={`https://www.tradingview.com/chart/?symbol=${encodeURIComponent(tvSym)}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block mt-3 text-xs text-[#c5a35e] hover:text-[#e0c887] transition-colors"
-                  >
-                    View chart →
-                  </a>
                 </div>
-              );
-            })}
-          </div>
-        )}
+                <div className="text-2xl font-bold tabular-nums text-slate-100">
+                  {formatPrice(a.price)}
+                </div>
+                {a.change != null && (
+                  <div className={`text-xs mt-1 tabular-nums ${isPositive ? "text-green-400" : "text-red-400"}`}>
+                    {isPositive ? "+" : ""}{a.change.toFixed(type === "bonds" ? 3 : 4)}
+                  </div>
+                )}
+                {a.yearHigh != null && a.yearLow != null && (
+                  <div className="text-xs text-slate-500 mt-2">
+                    Range: {formatPrice(a.yearLow)} – {formatPrice(a.yearHigh)}
+                  </div>
+                )}
+                {/* TradingView mini chart link */}
+                <a
+                  href={`https://www.tradingview.com/chart/?symbol=${encodeURIComponent(tvSym)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="block mt-3 text-xs text-[#c5a35e] hover:text-[#e0c887] transition-colors"
+                >
+                  View chart →
+                </a>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
-        {!loading && filtered.length === 0 && (
-          <div className="text-center py-16 text-slate-500">
-            No data available for this category.
-          </div>
-        )}
-      </div>
-    </main>
+      {!loading && filtered.length === 0 && (
+        <div className="text-center py-16 text-slate-500">
+          No data available for this category.
+        </div>
+      )}
+    </div>
   );
 }
