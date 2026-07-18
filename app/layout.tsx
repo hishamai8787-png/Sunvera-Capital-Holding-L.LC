@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+import Image from "next/image";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 import Providers from "./Providers";
@@ -8,6 +9,12 @@ import MobileNav from "@/components/MobileNav";
 import { ToastProvider } from "@/components/Toast";
 import SocialLinks from "@/components/SocialLinks";
 import "./globals.css";
+
+export const viewport: Viewport = {
+  themeColor: "#0a0e1a",
+  width: "device-width",
+  initialScale: 1,
+};
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -83,6 +90,7 @@ export const metadata: Metadata = {
       "https://media.base44.com/images/public/6a58633ccc2190d9113b4aaa/c756547b9_generated_image.png",
     ],
   },
+  manifest: "/manifest.json",
   icons: {
     icon: "/favicon.ico",
   },
@@ -179,7 +187,7 @@ export default function RootLayout({
         <header className="sticky top-0 z-40 border-b border-[#1e293b]/80 bg-[#0a0e1a]/85 backdrop-blur-md">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center gap-4">
             <Link href="/" className="flex items-center gap-2.5 shrink-0 group" aria-label="Sunvera Capital home">
-              <img src="https://media.base44.com/images/public/6a58633ccc2190d9113b4aaa/bbdfeaa11_generated_image.png" alt="Sunvera Capital Holding logo" className="w-8 h-8 rounded-lg gold-glow" />
+              <Image src="https://media.base44.com/images/public/6a58633ccc2190d9113b4aaa/bbdfeaa11_generated_image.png" alt="Sunvera Capital Holding logo" width={32} height={32} className="rounded-lg gold-glow" unoptimized />
               <span className="font-semibold tracking-tight hidden sm:block">
                 Sunvera <span className="text-[#c5a35e]">Capital</span>
               </span>
@@ -265,7 +273,7 @@ export default function RootLayout({
             {/* Top row: brand + social */}
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-2.5">
-                <img src="https://media.base44.com/images/public/6a58633ccc2190d9113b4aaa/bbdfeaa11_generated_image.png" alt="Sunvera Capital Holding logo" className="w-8 h-8 rounded-lg" />
+                <Image src="https://media.base44.com/images/public/6a58633ccc2190d9113b4aaa/bbdfeaa11_generated_image.png" alt="Sunvera Capital Holding logo" width={32} height={32} className="rounded-lg" unoptimized />
                 <span className="font-semibold text-sm">Sunvera <span className="text-[#c5a35e]">Capital</span></span>
               </div>
               <SocialLinks variant="footer" />

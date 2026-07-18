@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useState, useCallback } from "react";
 
 interface CompanyData {
@@ -157,7 +158,7 @@ export default function CompareClient() {
             {data.map((c) => (
               <div key={c.symbol} className={`card-surface rounded-xl p-4 ${c.error ? "opacity-60" : ""}`}>
                 {c.image && (
-                  <img src={c.image} alt={`${c.symbol} logo`} className="w-10 h-10 rounded mb-2" />
+                  <Image src={c.image} alt={`${c.symbol} logo`} width={40} height={40} className="rounded mb-2" unoptimized />
                 )}
                 <div className="text-sm font-bold text-[#e0c887]">{c.symbol}</div>
                 <div className="text-xs text-slate-400 truncate">{c.name ?? c.error}</div>

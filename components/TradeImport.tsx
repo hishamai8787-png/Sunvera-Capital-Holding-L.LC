@@ -2,9 +2,13 @@
 
 // Trade history import controls: upload xlsx/csv, download template,
 // load sample data, clear data.
+// Now with file validation (M9).
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const VALID_EXTENSIONS = [".xlsx", ".xls", ".csv"];
 
 export default function TradeImport({ hasData }: { hasData: boolean }) {
   const router = useRouter();
@@ -12,7 +16,26 @@ export default function TradeImport({ hasData }: { hasData: boolean }) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
 
+  const validateFile = (file: File): string | null => {
+    const ext = file.name.toLowerCase().match(/\.[^.]+$/)?.[0] ?? "";
+    if (!VALID_EXTENSIONS.includes(ext)) {
+      return `Invalid file type. Use ${VALID_EXTENSIONS.join(", ")}.`;
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      return "File too large. Maximum 10MB.";
+    }
+    if (file.size === 0) {
+      return "File is empty.";
+    }
+    return null;
+  };
+
   const upload = async (file: File) => {
+    const validationError = validateFile(file);
+    if (validationError) {
+      setMessage({ kind: "err", text: validationError });
+      return;
+    }
     setBusy(true);
     setMessage(null);
     try {
@@ -71,37 +94,45 @@ export default function TradeImport({ hasData }: { hasData: boolean }) {
         <button
           onClick={() => fileRef.current?.click()}
           disabled={busy}
-          className="rounded-lg bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-slate-950 font-semibold px-4 py-2 text-sm transition-colors"
+          aria-busy={busy}
+          className="rounded-lg bg-[#c5a35e] hover:bg-[#d4b06e] disabled:opacity-50 text-[#0a0e1a] font-semibold px-4 py-2 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-[#c5a35e] focus-visible:outline-offset-2"
         >
-          {busy ? "Working…" : "⬆ Import Excel / CSV"}
+          {busy ? "Working…" : (<><span aria-hidden="true">⬆</span> Import Excel / CSV</>)}
         </button>
         <a
           href="/api/playbooks/template"
-          className="rounded-lg border border-slate-700 hover:border-amber-400 text-slate-300 hover:text-amber-300 px-4 py-2 text-sm transition-colors"
+          className="rounded-lg border border-slate-700 hover:border-[#c5a35e] text-slate-300 hover:text-[#e0c887] px-4 py-2 text-sm transition-colors focus-visible:outline-2 focus-visible:outline-[#c5a35e] focus-visible:outline-offset-2"
         >
-          ⬇ Download template
+          <span aria-hidden="true">⬇</span> Download template
         </a>
         {!hasData && (
           <button
             onClick={loadSample}
             disabled={busy}
-            className="rounded-lg border border-slate-700 hover:border-amber-400 text-slate-300 hover:text-amber-300 px-4 py-2 text-sm transition-colors disabled:opacity-50"
+            className="rounded-lg border border-slate-700 hover:border-[#c5a35e] text-slate-300 hover:text-[#e0c887] px-4 py-2 text-sm transition-colors disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-[#c5a35e] focus-visible:outline-offset-2"
           >
-            ✨ Load sample data
+            <span aria-hidden="true">✨</span> Load sample data
           </button>
         )}
         {hasData && (
           <button
             onClick={clearAll}
             disabled={busy}
-            className="rounded-lg border border-slate-800 text-slate-500 hover:text-red-400 hover:border-red-400/50 px-4 py-2 text-sm transition-colors disabled:opacity-50"
+            className="rounded-lg border border-slate-800 text-slate-500 hover:text-red-400 hover:border-red-400/50 px-4 py-2 text-sm transition-colors disabled:opacity-50 focus-visible:outline-2 focus-visible:outline-[#c5a35e] focus-visible:outline-offset-2"
           >
             Clear data
           </button>
         )}
       </div>
+      <p className="text-xs text-slate-500">
+        Supports .xlsx, .xls, .csv up to 10MB. Use the template for the correct format.
+      </p>
       {message && (
-        <p className={`text-sm ${message.kind === "ok" ? "text-emerald-400" : "text-red-400"}`}>
+        <p
+          className={`text-sm ${message.kind === "ok" ? "text-emerald-400" : "text-red-400"}`}
+          role={message.kind === "err" ? "alert" : "status"}
+          aria-live="polite"
+        >
           {message.text}
         </p>
       )}

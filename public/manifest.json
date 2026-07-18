@@ -1,0 +1,25 @@
+{
+  "name": "Sunvera Capital Holding",
+  "short_name": "Sunvera",
+  "description": "Institutional equity analysis & credit intelligence platform",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0e1a",
+  "theme_color": "#0a0e1a",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://static.wixstatic.com/media/5aa5cc_c9f4fd76df3e4a039e093a91ff0c1200~mv2.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://static.wixstatic.com/media/5aa5cc_c9f4fd76df3e4a039e093a91ff0c1200~mv2.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["finance", "business", "productivity"]
+}
