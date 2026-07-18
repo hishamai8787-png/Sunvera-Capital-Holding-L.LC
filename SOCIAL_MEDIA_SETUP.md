@@ -1,13 +1,15 @@
 # Sunvera Capital — Social Media Account Setup Guide
 
-## Branded Assets
+## Branded Assets (Official Logo)
 
 | Asset | URL | Usage |
 |-------|-----|-------|
-| Profile Picture (square) | https://media.base44.com/images/public/6a58633ccc2190d9113b4aaa/d10132e8d_generated_image.png | All platforms |
-| Cover Banner (wide) | https://media.base44.com/images/public/6a58633ccc2190d9113b4aaa/055aeb9f8_generated_image.png | X, LinkedIn, Facebook, YouTube |
-| Logo (original) | https://media.base44.com/images/public/6a58633ccc2190d9113b4aaa/51c489c13_generated_image.png | Website, documents |
-| Hero Background | https://media.base44.com/images/public/6a58633ccc2190d9113b4aaa/b9c4cd9b6_generated_image.png | OG/Twitter cards |
+| Profile Picture (square) | https://media.base44.com/images/public/6a58633ccc2190d9113b4aaa/bbdfeaa11_generated_image.png | All platforms (X, IG, FB, LinkedIn, YouTube, Telegram) |
+| Cover Banner (wide) | https://media.base44.com/images/public/6a58633ccc2190d9113b4aaa/aad2c607c_generated_image.png | X, LinkedIn, Facebook, YouTube covers |
+| OG Share Card (1200x630) | https://media.base44.com/images/public/6a58633ccc2190d9113b4aaa/c756547b9_generated_image.png | Social media link previews |
+| Official Logo (user-provided) | https://media.base44.com/images/public/whatsapp/6a58633ccc2190d9113b4aaa/your_agent/6a58633ccc2190d9113b4aab/1a19dac05_whatsapp_image_786087801221308.jpg | Original brand asset |
+
+All assets use the official Sunvera Capital Holding logo with gold compass/arrow mark.
 
 ## Recommended Handles (Consistent Across Platforms)
 

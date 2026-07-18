@@ -67,7 +67,7 @@ export const metadata: Metadata = {
       "Research any company like an institution — 100+ ratios, DCF fair value, bank-grade credit proposals, and live market data in seconds.",
     images: [
       {
-        url: "https://media.base44.com/images/public/6a58633ccc2190d9113b4aaa/b9c4cd9b6_generated_image.png",
+        url: "https://media.base44.com/images/public/6a58633ccc2190d9113b4aaa/c756547b9_generated_image.png",
         width: 1200,
         height: 630,
         alt: "Sunvera Capital — Institutional Research Platform",
@@ -80,7 +80,7 @@ export const metadata: Metadata = {
     description:
       "Research any company like an institution — 100+ ratios, DCF, credit proposals, and live market data in seconds.",
     images: [
-      "https://media.base44.com/images/public/6a58633ccc2190d9113b4aaa/b9c4cd9b6_generated_image.png",
+      "https://media.base44.com/images/public/6a58633ccc2190d9113b4aaa/c756547b9_generated_image.png",
     ],
   },
   icons: {
@@ -179,9 +179,7 @@ export default function RootLayout({
         <header className="sticky top-0 z-40 border-b border-[#1e293b]/80 bg-[#0a0e1a]/85 backdrop-blur-md">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center gap-4">
             <Link href="/" className="flex items-center gap-2.5 shrink-0 group" aria-label="Sunvera Capital home">
-              <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#c5a35e] to-[#a8851f] flex items-center justify-center text-[#0a0e1a] font-black text-sm gold-glow" aria-hidden="true">
-                S
-              </span>
+              <img src="https://media.base44.com/images/public/6a58633ccc2190d9113b4aaa/bbdfeaa11_generated_image.png" alt="Sunvera Capital Holding logo" className="w-8 h-8 rounded-lg gold-glow" />
               <span className="font-semibold tracking-tight hidden sm:block">
                 Sunvera <span className="text-[#c5a35e]">Capital</span>
               </span>
@@ -267,7 +265,7 @@ export default function RootLayout({
             {/* Top row: brand + social */}
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div className="flex items-center gap-2.5">
-                <span className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#c5a35e] to-[#a8851f] flex items-center justify-center text-[#0a0e1a] font-black text-xs" aria-hidden="true">S</span>
+                <img src="https://media.base44.com/images/public/6a58633ccc2190d9113b4aaa/bbdfeaa11_generated_image.png" alt="Sunvera Capital Holding logo" className="w-8 h-8 rounded-lg" />
                 <span className="font-semibold text-sm">Sunvera <span className="text-[#c5a35e]">Capital</span></span>
               </div>
               <SocialLinks variant="footer" />
