@@ -144,4 +144,10 @@ export async function rateLimitResponse(
   return null;
 }
 
-export { API_LIMIT, SCANNER_LIMIT };
+// Contact form: 5 submissions per minute to prevent spam
+const CONTACT_LIMIT: RateLimitConfig = {
+  windowMs: 60 * 1000,
+  maxRequests: 5,
+};
+
+export { API_LIMIT, SCANNER_LIMIT, CONTACT_LIMIT };

@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { rateLimitResponse } from "@/lib/rateLimit";
+import { rateLimitResponse, CONTACT_LIMIT } from "@/lib/rateLimit";
 import { sanitizeString } from "@/lib/validation";
 
 export async function POST(req: Request) {
-  const rl = await rateLimitResponse(req, "contact");
+  const rl = await rateLimitResponse(req, "contact", CONTACT_LIMIT);
   if (rl) return rl;
 
   try {
