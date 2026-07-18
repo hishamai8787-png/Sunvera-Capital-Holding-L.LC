@@ -156,27 +156,22 @@ export default async function PlaybooksPage() {
                     </thead>
                     <tbody>
                       {[...trades]
-                        .sort((a, b) => b.dateOpened.localeCompare(a.dateOpened))
+                        .sort((a, b) => b.date.localeCompare(a.date))
                         .map((t) => (
                           <tr key={t.id} className="border-t border-slate-800/60 hover:bg-slate-800/30 transition-colors">
-                            <td className="px-4 py-2 text-slate-400 whitespace-nowrap">{t.dateOpened}</td>
-                            <td className="px-3 py-2 text-slate-400 whitespace-nowrap">
-                              {t.dateClosed ?? <span className="text-[#c5a35e]">open</span>}
-                            </td>
+                            <td className="px-4 py-2 text-slate-400 whitespace-nowrap">{t.date}</td>
                             <td className="px-3 py-2 text-slate-200">
                               <span className="font-medium">{t.symbol}</span>
-                              <span className="text-slate-400 text-xs ml-1.5 hidden lg:inline">{t.name}</span>
                             </td>
+                            <td className="px-3 py-2 text-slate-400">
+                              <span className={t.side === "buy" ? "text-emerald-400" : "text-red-400"}>{t.side.toUpperCase()}</span>
+                            </td>
+                            <td className="px-3 py-2 text-right tabular-nums text-slate-300">{t.quantity}</td>
+                            <td className="px-3 py-2 text-right tabular-nums text-slate-300">{t.price.toFixed(2)}</td>
                             <td className="px-3 py-2 text-slate-400">{t.assetClass}</td>
-                            <td className="px-3 py-2 text-slate-400">{t.sector}</td>
                             <td className="px-3 py-2 text-slate-400">{t.market}</td>
-                            <td className="px-3 py-2 text-slate-400">{t.direction}</td>
-                            <td className={`px-3 py-2 text-right tabular-nums ${pnlColor(t.pnlPct)}`}>
-                              {t.pnlPct !== null ? `${t.pnlPct >= 0 ? "+" : ""}${(t.pnlPct * 100).toFixed(1)}%` : "—"}
-                            </td>
-                            <td className={`px-4 py-2 text-right tabular-nums ${pnlColor(t.pnl)}`}>
-                              {money(t.pnl)}
-                            </td>
+                            <td className="px-3 py-2 text-slate-400">{t.sector}</td>
+                            <td className="px-4 py-2 text-slate-400 text-xs">{t.notes ?? "—"}</td>
                           </tr>
                         ))}
                     </tbody>

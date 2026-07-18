@@ -104,9 +104,9 @@ function computeStats(segment: string, trades: Trade[], context: "overall" | "se
       }
     }
 
-    if (best && best.pnlPct !== null && context === "segment") {
+    if (best && best.pnlPct != null && context === "segment") {
       narrative.push(
-        `Best: ${best.symbol} ${pct(best.pnlPct)}${best.thesis ? ` ("${best.thesis}")` : ""}${worst && worst.pnlPct !== null && worst.id !== best.id ? `; worst: ${worst.symbol} ${pct(worst.pnlPct)}${worst.notes ? ` — ${worst.notes}` : ""}` : ""}.`
+        `Best: ${best.symbol} ${pct(best.pnlPct ?? null)}${best.thesis ? ` ("${best.thesis}")` : ""}${worst && worst.pnlPct != null && worst.id !== best.id ? `; worst: ${worst.symbol} ${pct(worst.pnlPct ?? null)}${worst.notes ? ` — ${worst.notes}` : ""}` : ""}.`
       );
     }
 
@@ -161,6 +161,6 @@ export function buildPlaybook(trades: Trade[]): PlaybookReport {
     bySector: groupBy(trades, (t) => t.sector),
     byAssetClass: groupBy(trades, (t) => t.assetClass),
     byMarket: groupBy(trades, (t) => t.market),
-    byYear: groupBy(trades, (t) => t.dateOpened.slice(0, 4)),
+    byYear: groupBy(trades, (t) => t.date.slice(0, 4)),
   };
 }

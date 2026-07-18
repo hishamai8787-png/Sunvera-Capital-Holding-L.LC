@@ -249,7 +249,7 @@ export default async function CreditPage({
                     {[
                       { l: "Net Debt / EBITDA", b: fx(assessment.proForma.netDebtEbitda.before), a: fx(assessment.proForma.netDebtEbitda.after) },
                       { l: "Interest Coverage", b: fx(assessment.proForma.interestCoverage.before), a: fx(assessment.proForma.interestCoverage.after) },
-                      { l: "DSCR", b: fx(assessment.proForma.dscr.before), a: fx(assessment.proForma.dscr.after) },
+                      { l: "DSCR (Pro Forma)", b: "—", a: fx(assessment.proForma.dscrProForma) },
                     ].map((row) => (
                       <tr key={row.l} className="border-b border-slate-800/60 last:border-0">
                         <td className="px-5 py-2.5 text-slate-300">{row.l}</td>
@@ -263,7 +263,7 @@ export default async function CreditPage({
             )}
 
             {/* Peer comparison */}
-            {peers.length > 0 && (
+            {peers && peers.peers.length > 0 && (
               <div className="card-surface overflow-hidden">
                 <h3 className="px-5 py-3 text-sm font-semibold text-slate-200 border-b border-slate-800 bg-slate-900">
                   Peer Comparison
@@ -275,22 +275,20 @@ export default async function CreditPage({
                         <th scope="col" className="px-5 py-2 text-left font-medium">Company</th>
                         <th scope="col" className="px-3 py-2 text-right font-medium">ND/EBITDA</th>
                         <th scope="col" className="px-3 py-2 text-right font-medium">Int. Cov.</th>
-                        <th scope="col" className="px-5 py-2 text-right font-medium">Rating</th>
+                        <th scope="col" className="px-5 py-2 text-right font-medium">EBITDA Mgn</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {peers.map((p) => (
+                      {peers.peers.map((p) => (
                         <tr key={p.symbol} className="border-b border-slate-800/60 last:border-0">
                           <td className="px-5 py-2 text-slate-200">
                             <Link href={`/credit/${p.symbol}`} className="font-medium hover:text-[#e0c887]">{p.symbol}</Link>
-                            <span className="text-xs text-slate-400 ml-1.5 hidden lg:inline">{p.name}</span>
+                            <span className="text-xs text-slate-400 ml-1.5 hidden lg:inline">{p.companyName ?? ""}</span>
                           </td>
                           <td className="px-3 py-2 text-right tabular-nums text-slate-300">{fx(p.netDebtEbitda)}</td>
                           <td className="px-3 py-2 text-right tabular-nums text-slate-300">{fx(p.interestCoverage)}</td>
-                          <td className="px-5 py-2 text-right">
-                            <span className={`font-medium ${p.grade <= 3 ? "text-emerald-300" : p.grade <= 5 ? "text-[#e0c887]" : "text-red-400"}`}>
-                              {p.grade}/10
-                            </span>
+                          <td className="px-5 py-2 text-right tabular-nums text-slate-300">
+                            {p.ebitdaMargin != null ? `${(p.ebitdaMargin * 100).toFixed(1)}%` : "—"}
                           </td>
                         </tr>
                       ))}
@@ -312,17 +310,24 @@ export default async function CreditPage({
               <thead>
                 <tr className="text-xs uppercase tracking-wider text-slate-400">
                   <th scope="col" className="px-5 py-2 text-left font-medium">Metric</th>
-                  {report.summary.years.map((y) => (
-                    <th key={y} scope="col" className="px-3 py-2 text-right font-medium">{y}</th>
+                  {assessment.trend.map((t) => (
+                    <th key={t.year} scope="col" className="px-3 py-2 text-right font-medium">{t.year}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {report.summary.rows.map((row) => (
+                {[
+                  { label: "Revenue", get: (t: any) => t.revenue },
+                  { label: "EBITDA", get: (t: any) => t.ebitda },
+                  { label: "Net Debt / EBITDA", get: (t: any) => t.netDebtEbitda },
+                  { label: "Interest Coverage", get: (t: any) => t.interestCoverage },
+                  { label: "Operating Cash Flow", get: (t: any) => t.ocf },
+                  { label: "Free Cash Flow", get: (t: any) => t.fcf },
+                ].map((row) => (
                   <tr key={row.label} className="border-t border-slate-800/60">
                     <td className="px-5 py-2 text-slate-300">{row.label}</td>
-                    {row.values.map((v, i) => (
-                      <td key={i} className="px-3 py-2 text-right tabular-nums text-slate-200">{v ?? "—"}</td>
+                    {assessment.trend.map((t, i) => (
+                      <td key={i} className="px-3 py-2 text-right tabular-nums text-slate-200">{row.get(t) != null ? fx(row.get(t)) : "—"}</td>
                     ))}
                   </tr>
                 ))}

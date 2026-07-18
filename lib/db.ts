@@ -71,7 +71,7 @@ export async function saveClientsDb<T extends { id: string }>(clients: T[]): Pro
     // Upsert all clients
     const { error } = await supabase
       .from("clients")
-      .upsert(clients as unknown as Record<string, unknown>[], { onConflict: "id" });
+      .upsert(clients as unknown as never[], { onConflict: "id" });
     if (error) throw error;
     return;
   }
@@ -98,7 +98,7 @@ export async function saveTradesDb<T>(trades: T[]): Promise<void> {
     const supabase = getSupabase();
     const { error } = await supabase
       .from("trades")
-      .upsert(trades as unknown as Record<string, unknown>[], { onConflict: "id" });
+      .upsert(trades as unknown as never[], { onConflict: "id" });
     if (error) throw error;
     return;
   }
@@ -125,7 +125,7 @@ export async function loadLastScanDb<T>(): Promise<T | null> {
 export async function saveScanDb<T extends { generatedAt: string }>(scan: T): Promise<void> {
   if (hasDatabase()) {
     const supabase = getSupabase();
-    const { error } = await supabase.from("scans").insert(scan as unknown as Record<string, unknown>);
+    const { error } = await supabase.from("scans").insert(scan as unknown as never);
     if (error) throw error;
     return;
   }

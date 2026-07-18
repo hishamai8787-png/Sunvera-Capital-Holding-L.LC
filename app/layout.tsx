@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
-import { SessionProvider } from "next-auth/react";
+import Providers from "./Providers";
 import TickerSearch from "@/components/TickerSearch";
 import CurrencyProvider, { CurrencySelect } from "@/components/CurrencyProvider";
 import "./globals.css";
@@ -14,7 +14,7 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
-]);
+});
 
 const siteUrl = "https://sunveracapital.com";
 
@@ -153,7 +153,7 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col bg-[#0a0e1a] text-slate-100">
-        <SessionProvider>
+        <Providers>
         <CurrencyProvider>
         {/* Skip-to-content link — keyboard accessibility (WCAG 2.4.1) */}
         <a
@@ -228,7 +228,7 @@ export default function RootLayout({
           </div>
         </footer>
         </CurrencyProvider>
-        </SessionProvider>
+        </Providers>
       </body>
     </html>
   );

@@ -56,7 +56,7 @@ export default function Home() {
         </h1>
 
         <div className="max-w-xl mx-auto mt-8">
-          <TickerSearch size="lg" autoFocus placeholder="Try \"Apple\", \"Microsoft\", or a ticker…" />
+          <TickerSearch size="lg" autoFocus placeholder='Try "Apple", "Microsoft", or a ticker' />
         </div>
 
         <div className="mt-5 flex flex-wrap justify-center gap-2" aria-label="Example tickers">
