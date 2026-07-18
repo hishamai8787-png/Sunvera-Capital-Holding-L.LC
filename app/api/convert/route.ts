@@ -1,9 +1,11 @@
 // GET /api/convert?from=EUR&to=USD&amount=1000 — currency converter
+// Primary: FMP. Fallback: open.er-api.com (free, no key).
 import { NextResponse } from "next/server";
 import { rateLimitResponse } from "@/lib/rateLimit";
 import { sanitizeString } from "@/lib/validation";
+import { freeConvert } from "@/lib/freeDataSources";
 
-export const revalidate = 60;
+export const revalidate = 30;
 
 export async function GET(req: Request) {
   const rl = await rateLimitResponse(req, "convert");
@@ -27,91 +29,81 @@ export async function GET(req: Request) {
     );
   }
 
-  const key = process.env.FMP_API_KEY;
-  if (!key || key.startsWith("PASTE_")) {
-    return NextResponse.json(
-      { error: "API key not configured." },
-      { status: 503 }
-    );
+  if (from === to) {
+    return NextResponse.json({
+      from, to, rate: 1, amount, converted: amount, pair: `${from}/${to}`, source: "identity",
+    });
   }
 
-  try {
-    // FMP forex pair symbol is e.g. "EURUSD"
-    const pair = `${from}${to}`;
-    const res = await fetch(
-      `https://financialmodelingprep.com/stable/quote?symbol=${pair}&apikey=${key}`,
-      { next: { revalidate: 60 } }
-    );
+  const key = process.env.FMP_API_KEY;
 
-    if (!res.ok) {
-      return NextResponse.json(
-        { error: "Unable to fetch exchange rate." },
-        { status: 502 }
+  // Try FMP first
+  if (key && !key.startsWith("PASTE_")) {
+    try {
+      const pair = `${from}${to}`;
+      const res = await fetch(
+        `https://financialmodelingprep.com/stable/quote?symbol=${pair}&apikey=${key}`,
+        { next: { revalidate: 30 } }
       );
-    }
 
-    const quotes = (await res.json()) as Array<{ symbol: string; price?: number }>;
-    let rate = quotes[0]?.price;
+      if (res.ok) {
+        const quotes = (await res.json()) as Array<{ symbol: string; price?: number }>;
+        let rate = quotes[0]?.price;
 
-    // If direct pair not found, try reverse (e.g. USDEUR -> 1/EURUSD)
-    if (!rate && from !== to) {
-      const reversePair = `${to}${from}`;
-      const reverseRes = await fetch(
-        `https://financialmodelingprep.com/stable/quote?symbol=${reversePair}&apikey=${key}`,
-        { next: { revalidate: 60 } }
-      );
-      if (reverseRes.ok) {
-        const reverseQuotes = (await reverseRes.json()) as Array<{ symbol: string; price?: number }>;
-        if (reverseQuotes[0]?.price) {
-          rate = 1 / reverseQuotes[0].price;
+        if (!rate) {
+          // Try reverse pair
+          const reversePair = `${to}${from}`;
+          const reverseRes = await fetch(
+            `https://financialmodelingprep.com/stable/quote?symbol=${reversePair}&apikey=${key}`,
+            { next: { revalidate: 30 } }
+          );
+          if (reverseRes.ok) {
+            const reverseQuotes = (await reverseRes.json()) as Array<{ symbol: string; price?: number }>;
+            if (reverseQuotes[0]?.price) {
+              rate = 1 / reverseQuotes[0].price;
+            }
+          }
+        }
+
+        // Try USD cross
+        if (!rate && from !== "USD" && to !== "USD") {
+          const fromUsd = await fetchFmpRate("USD" + from, key);
+          const toUsd = await fetchFmpRate("USD" + to, key);
+          if (fromUsd && toUsd) rate = toUsd / fromUsd;
+        }
+
+        if (rate) {
+          return NextResponse.json({
+            from, to, rate: parseFloat(rate.toFixed(6)), amount,
+            converted: parseFloat((amount * rate).toFixed(2)),
+            pair: `${from}/${to}`, source: "fmp",
+          }, { headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" } });
         }
       }
+    } catch {
+      // Fall through to free API
     }
-
-    // If still no rate, try via USD cross
-    if (!rate && from !== "USD" && to !== "USD") {
-      const fromUsd = await fetchRate("USD" + from, key);
-      const toUsd = await fetchRate("USD" + to, key);
-      if (fromUsd && toUsd) {
-        rate = toUsd / fromUsd;
-      }
-    }
-
-    if (!rate) {
-      if (from === to) rate = 1;
-      else {
-        return NextResponse.json(
-          { error: `No exchange rate available for ${from}/${to}.` },
-          { status: 404 }
-        );
-      }
-    }
-
-    return NextResponse.json(
-      {
-        from,
-        to,
-        rate: parseFloat(rate.toFixed(6)),
-        amount,
-        converted: parseFloat((amount * rate).toFixed(2)),
-        pair: `${from}/${to}`,
-      },
-      { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=120" } }
-    );
-  } catch (err) {
-    console.error("[convert] Error:", err instanceof Error ? err.message : String(err));
-    return NextResponse.json(
-      { error: "Conversion failed. Please try again." },
-      { status: 500 }
-    );
   }
+
+  // Fallback: free API (no key required)
+  const freeResult = await freeConvert(from, to, amount);
+  if (freeResult) {
+    return NextResponse.json(freeResult, {
+      headers: { "Cache-Control": "public, s-maxage=30, stale-while-revalidate=60" },
+    });
+  }
+
+  return NextResponse.json(
+    { error: `No exchange rate available for ${from}/${to}.` },
+    { status: 404 }
+  );
 }
 
-async function fetchRate(pair: string, key: string): Promise<number | null> {
+async function fetchFmpRate(pair: string, key: string): Promise<number | null> {
   try {
     const res = await fetch(
       `https://financialmodelingprep.com/stable/quote?symbol=${pair}&apikey=${key}`,
-      { next: { revalidate: 60 } }
+      { next: { revalidate: 30 } }
     );
     if (!res.ok) return null;
     const quotes = (await res.json()) as Array<{ symbol: string; price?: number }>;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 
 const CURRENCIES = [
   { code: "USD", name: "US Dollar", flag: "🇺🇸" },
@@ -43,6 +43,8 @@ export default function ForexConverter() {
   const [result, setResult] = useState<ConvertResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
+  const mountedRef = useRef(false);
 
   const handleConvert = useCallback(async () => {
     const amt = parseFloat(amount);
@@ -59,14 +61,31 @@ export default function ForexConverter() {
         throw new Error(errData.error || "Conversion failed");
       }
       const data = await res.json();
-      setResult(data);
+      if (mountedRef.current) {
+        setResult(data);
+        setLastUpdate(new Date());
+      }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Conversion failed.");
-      setResult(null);
+      if (mountedRef.current) setError(e instanceof Error ? e.message : "Conversion failed.");
     } finally {
-      setLoading(false);
+      if (mountedRef.current) setLoading(false);
     }
   }, [from, to, amount]);
+
+  // Auto-convert on mount and when currencies change
+  useEffect(() => {
+    mountedRef.current = true;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    handleConvert();
+    return () => { mountedRef.current = false; };
+  }, [from, to]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Auto-refresh result every 30s when displayed
+  useEffect(() => {
+    if (!result) return;
+    const interval = setInterval(() => handleConvert(), 30000);
+    return () => clearInterval(interval);
+  }, [result, handleConvert]);
 
   function swapCurrencies() {
     setFrom(to);
@@ -80,19 +99,31 @@ export default function ForexConverter() {
     return v.toFixed(6);
   }
 
-  // Quick conversion table (common amounts)
   const quickAmounts = [1, 10, 100, 1000, 10000];
 
   return (
     <div className="card-surface rounded-xl p-6">
-      <h2 className="text-lg font-semibold text-slate-100 mb-1">
-        <span aria-hidden="true">💱</span> Currency Converter
-      </h2>
-      <p className="text-xs text-slate-400 mb-4">Live rates via FMP. Convert between 20+ currencies.</p>
+      <div className="flex items-center justify-between mb-1">
+        <h2 className="text-lg font-semibold text-slate-100">
+          <span aria-hidden="true">💱</span> Currency Converter
+        </h2>
+        {result && (
+          <div className="flex items-center gap-1.5 text-xs">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            </span>
+            <span className="text-green-400 font-medium">LIVE</span>
+          </div>
+        )}
+      </div>
+      <p className="text-xs text-slate-400 mb-4">
+        Live rates via FMP. Convert between 20+ currencies.
+        {lastUpdate && ` Last updated ${lastUpdate.toLocaleTimeString("en-US", { hour12: false })}.`}
+      </p>
 
       {/* Main converter */}
       <div className="grid sm:grid-cols-[1fr_auto_1fr] gap-3 items-end mb-4">
-        {/* From */}
         <div>
           <label htmlFor="from-currency" className="block text-xs text-slate-400 mb-1">From</label>
           <div className="flex gap-2">
@@ -117,7 +148,6 @@ export default function ForexConverter() {
           </div>
         </div>
 
-        {/* Swap button */}
         <button
           onClick={swapCurrencies}
           aria-label="Swap currencies"
@@ -126,7 +156,6 @@ export default function ForexConverter() {
           ⇄
         </button>
 
-        {/* To */}
         <div>
           <label htmlFor="to-currency" className="block text-xs text-slate-400 mb-1">To</label>
           <select
@@ -159,7 +188,6 @@ export default function ForexConverter() {
 
       {result && (
         <div className="mt-6 space-y-4" aria-live="polite">
-          {/* Main result */}
           <div className="text-center rounded-lg bg-slate-800/50 border border-slate-700/50 p-5">
             <div className="text-xs text-slate-400 mb-1">
               {formatAmount(result.amount)} {result.from} =
@@ -172,7 +200,6 @@ export default function ForexConverter() {
             </div>
           </div>
 
-          {/* Quick conversion table */}
           <div className="rounded-lg overflow-hidden">
             <table className="w-full text-sm">
               <thead>
