@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import { SITE_URL } from "@/lib/siteConfig";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
   description: "Terms of Service for Sunvera Capital Holding LLC — usage terms, limitations, and disclaimers.",
-  alternates: { canonical: "https://sunveracapital.com/terms" },
+  alternates: { canonical: `${SITE_URL}/terms` },
 };
 
 export default function TermsPage() {

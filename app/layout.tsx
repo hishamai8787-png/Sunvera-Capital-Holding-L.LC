@@ -27,7 +27,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const siteUrl = "https://sunveracapital.com";
+import { SITE_URL as siteUrl } from "@/lib/siteConfig";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

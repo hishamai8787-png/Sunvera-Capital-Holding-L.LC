@@ -1,11 +1,12 @@
 import GlobalGuide from "@/components/GlobalGuide";
+import { SITE_URL } from "@/lib/siteConfig";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Global Market Guide",
   description:
     "How to enter each market — brokers, required documents, individual vs entity structures, cross-border tax comparison and optimization ideas.",
-  alternates: { canonical: "https://sunveracapital.com/global" },
+  alternates: { canonical: `${SITE_URL}/global` },
 };
 
 export default function GlobalPage() {

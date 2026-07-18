@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SITE_URL } from "@/lib/siteConfig";
 import TickerSearch from "@/components/TickerSearch";
 import type { Metadata } from "next";
 
@@ -32,7 +33,7 @@ export const metadata: Metadata = {
   title: "Sunvera Capital | Institutional Equity & Credit Intelligence",
   description:
     "Research any company like an institution — 100+ financial ratios, Altman Z-Score, Piotroski F-Score, DCF fair value, bank-grade credit proposals, and live market data in seconds.",
-  alternates: { canonical: "https://sunveracapital.com" },
+  alternates: { canonical: SITE_URL },
 };
 
 export default function Home() {

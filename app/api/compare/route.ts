@@ -1,5 +1,6 @@
 // GET /api/compare?symbols=AAPL,MSFT,GOOGL — side-by-side company comparison
 import { NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
 import { getProfile, getQuote, getIncomeStatements, getBalanceSheets, getCashFlows } from "@/lib/fmp";
 import { rateLimitResponse } from "@/lib/rateLimit";
 import { sanitizeString } from "@/lib/validation";
@@ -96,7 +97,7 @@ export async function GET(req: Request) {
       { headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600" } }
     );
   } catch (err) {
-    console.error("[compare] Error:", err instanceof Error ? err.message : String(err));
+    logger.error("compare", err instanceof Error ? err.message : String(err));
     return NextResponse.json(
       { error: "Comparison failed. Please try again." },
       { status: 500 }

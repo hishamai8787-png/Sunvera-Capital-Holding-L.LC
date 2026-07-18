@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import { SITE_URL } from "@/lib/siteConfig";
 import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Dashboard",
   description: "Overview of all Sunvera Capital analysis modules and quick access links.",
-  alternates: { canonical: "https://sunveracapital.com/dashboard" },
+  alternates: { canonical: `${SITE_URL}/dashboard` },
 };
 
 const MODULES = [

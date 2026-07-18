@@ -1,11 +1,12 @@
 import AssetGrid from "@/components/AssetGrid";
+import { SITE_URL } from "@/lib/siteConfig";
 import HistoryChart from "@/components/HistoryChart";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Crypto — Digital Asset Prices & Charts",
   description: "Live cryptocurrency prices for Bitcoin, Ethereum, and top altcoins with historical comparison charts.",
-  alternates: { canonical: "https://sunveracapital.com/crypto" },
+  alternates: { canonical: `${SITE_URL}/crypto` },
 };
 
 export default function CryptoPage() {

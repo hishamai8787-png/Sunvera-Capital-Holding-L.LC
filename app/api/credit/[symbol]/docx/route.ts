@@ -1,6 +1,7 @@
 // GET /api/credit/AAPL/docx?amount=...&tenor=... — downloads the credit
 // proposal as a formatted Word document.
 
+import { logger } from "@/lib/logger";
 import {
   Document,
   Packer,
@@ -114,7 +115,7 @@ export async function GET(
     report = await buildCreditReport(decodeURIComponent(symbol), facility, peers);
   } catch (err) {
     const status = err instanceof DataSourceError ? (err.status ?? 502) : 500;
-    console.error("[credit/docx] Error:", err);
+    logger.error("credit/docx", err instanceof Error ? err.message : String(err));
     return new Response(
       status === 404 ? "Company not found." : "Failed to generate credit report.",
       { status }

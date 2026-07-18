@@ -1,11 +1,12 @@
 import AssetGrid from "@/components/AssetGrid";
+import { SITE_URL } from "@/lib/siteConfig";
 import HistoryChart from "@/components/HistoryChart";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Bonds — Sovereign Yields & Historical Charts",
   description: "Live government bond yields for US Treasuries and international sovereign debt with historical comparison.",
-  alternates: { canonical: "https://sunveracapital.com/bonds" },
+  alternates: { canonical: `${SITE_URL}/bonds` },
 };
 
 export default function BondsPage() {

@@ -1,4 +1,5 @@
 import { loadClients } from "@/lib/clients";
+import { SITE_URL } from "@/lib/siteConfig";
 import ClientsManager from "@/components/ClientsManager";
 import type { Metadata } from "next";
 
@@ -6,7 +7,7 @@ export const metadata: Metadata = {
   title: "Clients & Mandates",
   description:
     "Portfolio mandates with score floors, valuation ceilings, leverage limits, and sector rules. Screen holdings for compliance and discover new ideas.",
-  alternates: { canonical: "https://sunveracapital.com/clients" },
+  alternates: { canonical: `${SITE_URL}/clients` },
 };
 
 export const dynamic = "force-dynamic";

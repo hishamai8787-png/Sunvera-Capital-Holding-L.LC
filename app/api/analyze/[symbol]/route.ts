@@ -2,6 +2,7 @@
 // Cached for 5 minutes to reduce external API calls.
 
 import { NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
 import { analyzeCompany } from "@/lib/analyze";
 import { DataSourceError } from "@/lib/fmp";
 import { validateTicker } from "@/lib/validation";
@@ -33,7 +34,7 @@ export async function GET(
       },
     });
   } catch (err) {
-    console.error("[analyze] Error:", err instanceof Error ? err.message : String(err));
+    logger.error("analyze", err instanceof Error ? err.message : String(err));
     if (err instanceof DataSourceError) {
       return NextResponse.json(
         { error: "Unable to retrieve data from the data source. Please try again later." },

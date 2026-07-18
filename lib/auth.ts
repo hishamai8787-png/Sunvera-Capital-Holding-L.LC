@@ -14,6 +14,7 @@
 import type { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
+import { logger } from "@/lib/logger";
 
 // User roles
 export type UserRole = "admin" | "analyst" | "viewer";
@@ -40,7 +41,7 @@ export const authOptions: NextAuthOptions = {
         const adminPasswordHash = process.env.ADMIN_PASSWORD_HASH;
 
         if (!adminEmail || !adminPasswordHash) {
-          console.error("[auth] ADMIN_EMAIL or ADMIN_PASSWORD_HASH not configured");
+          logger.error("auth", "ADMIN_EMAIL or ADMIN_PASSWORD_HASH not configured");
           return null;
         }
 

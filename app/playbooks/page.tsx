@@ -1,4 +1,5 @@
 import { loadTrades } from "@/lib/trades";
+import { SITE_URL } from "@/lib/siteConfig";
 import { buildPlaybook, type SegmentStats } from "@/lib/playbook";
 import TradeImport from "@/components/TradeImport";
 import type { Metadata } from "next";
@@ -7,7 +8,7 @@ export const metadata: Metadata = {
   title: "Trade Playbooks",
   description:
     "Historical trade analysis by sector, asset class, market, and year. Hit rate, average return, P&L, and narrative insights from your trading history.",
-  alternates: { canonical: "https://sunveracapital.com/playbooks" },
+  alternates: { canonical: `${SITE_URL}/playbooks` },
 };
 
 export const dynamic = "force-dynamic";

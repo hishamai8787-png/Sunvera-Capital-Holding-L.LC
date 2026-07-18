@@ -1,4 +1,5 @@
 import AssetGrid from "@/components/AssetGrid";
+import { SITE_URL } from "@/lib/siteConfig";
 import ForexConverter from "@/components/ForexConverter";
 import HistoryChart from "@/components/HistoryChart";
 import type { Metadata } from "next";
@@ -6,7 +7,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Forex — Live Currency Rates & Converter",
   description: "Real-time forex rates for major, minor, emerging market, and Gulf currency pairs with live converter and historical charts.",
-  alternates: { canonical: "https://sunveracapital.com/forex" },
+  alternates: { canonical: `${SITE_URL}/forex` },
 };
 
 export default function ForexPage() {

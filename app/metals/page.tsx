@@ -1,11 +1,12 @@
 import AssetGrid from "@/components/AssetGrid";
+import { SITE_URL } from "@/lib/siteConfig";
 import HistoryChart from "@/components/HistoryChart";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Precious Metals & Minerals — Live Prices & Charts",
   description: "Live prices for gold, silver, platinum, palladium, copper, and industrial minerals with historical comparison.",
-  alternates: { canonical: "https://sunveracapital.com/metals" },
+  alternates: { canonical: `${SITE_URL}/metals` },
 };
 
 export default function MetalsPage() {

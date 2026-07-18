@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SITE_URL } from "@/lib/siteConfig";
 import { loadLastScan } from "@/lib/scanner";
 import ScanRunner from "@/components/ScanRunner";
 import type { Metadata } from "next";
@@ -7,7 +8,7 @@ export const metadata: Metadata = {
   title: "Opportunity Scanner",
   description:
     "Run the full Sunvera Capital framework over the investable universe. Flags names worth a closer look with reasons — not just rankings.",
-  alternates: { canonical: "https://sunveracapital.com/scanner" },
+  alternates: { canonical: `${SITE_URL}/scanner` },
 };
 
 export const dynamic = "force-dynamic";

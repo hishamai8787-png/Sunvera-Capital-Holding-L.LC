@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SITE_URL } from "@/lib/siteConfig";
 import { buildCreditReport } from "@/lib/creditReport";
 import { DataSourceError } from "@/lib/fmp";
 import type { FacilityInput } from "@/lib/credit";
@@ -13,7 +14,7 @@ export async function generateMetadata({ params }: { params: Promise<{ symbol: s
   return {
     title: `${sym} — Credit Proposal`,
     description: `Bank-grade credit assessment for ${sym}: DSCR, leverage, pro-forma facility impact, peer benchmarks, risk rating, and Word document export for committee.`,
-    alternates: { canonical: `https://sunveracapital.com/credit/${sym}` },
+    alternates: { canonical: `${SITE_URL}/credit/${sym}` },
   };
 }
 

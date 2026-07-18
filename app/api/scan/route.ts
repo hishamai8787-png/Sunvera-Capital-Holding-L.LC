@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
 import { runScan, loadLastScan } from "@/lib/scanner";
 import { sanitizeString } from "@/lib/validation";
 import { rateLimitResponse, SCANNER_LIMIT } from "@/lib/rateLimit";
@@ -44,7 +45,7 @@ export async function POST(req: Request) {
       },
     });
   } catch (err) {
-    console.error("[scan] Error:", err instanceof Error ? err.message : String(err));
+    logger.error("scan", err instanceof Error ? err.message : String(err));
     return NextResponse.json(
       { error: "Scan failed. Please try again later." },
       { status: 500 }

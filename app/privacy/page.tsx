@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import { SITE_URL } from "@/lib/siteConfig";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
   description: "Privacy Policy for Sunvera Capital Holding LLC — how we collect, use, and protect your data.",
-  alternates: { canonical: "https://sunveracapital.com/privacy" },
+  alternates: { canonical: `${SITE_URL}/privacy` },
 };
 
 export default function PrivacyPage() {

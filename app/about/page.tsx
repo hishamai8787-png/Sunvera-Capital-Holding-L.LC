@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
+import { SITE_URL } from "@/lib/siteConfig";
 import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "About Sunvera Capital",
   description:
     "Sunvera Capital Holding LLC — institutional-grade equity analysis, credit proposals, and live market data for professional investors.",
-  alternates: { canonical: "https://sunveracapital.com/about" },
+  alternates: { canonical: `${SITE_URL}/about` },
 };
 
 const VALUES = [

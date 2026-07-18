@@ -1,10 +1,11 @@
 import CompareClient from "./CompareClient";
+import { SITE_URL } from "@/lib/siteConfig";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Compare Companies — Side-by-Side Analysis",
   description: "Compare up to 5 companies across 15 financial metrics.",
-  alternates: { canonical: "https://sunveracapital.com/compare" },
+  alternates: { canonical: `${SITE_URL}/compare` },
 };
 
 export default function ComparePage() {

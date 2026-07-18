@@ -1,4 +1,5 @@
 "use client";
+import { SITE_URL } from "@/lib/siteConfig";
 
 const SOCIAL_PLATFORMS = [
   {
@@ -53,7 +54,7 @@ interface SocialLinksProps {
 
 export default function SocialLinks({ variant = "footer", shareUrl, shareTitle }: SocialLinksProps) {
   if (variant === "share") {
-    const url = encodeURIComponent(shareUrl ?? "https://sunveracapital.com");
+    const url = encodeURIComponent(shareUrl ?? SITE_URL);
     const title = encodeURIComponent(shareTitle ?? "Sunvera Capital — Institutional Research Platform");
     const sharePlatforms = [
       { name: "X", url: `https://twitter.com/intent/tweet?url=${url}&text=${title}`, icon: SOCIAL_PLATFORMS[0].icon },

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { SITE_URL } from "@/lib/siteConfig";
 import { analyzeCompany } from "@/lib/analyze";
 import { DataSourceError } from "@/lib/fmp";
 import TradingViewChart from "@/components/TradingViewChart";
@@ -20,7 +21,7 @@ export async function generateMetadata({ params }: { params: Promise<{ symbol: s
   return {
     title: `${sym} — Equity Analysis`,
     description: `Institutional-grade equity analysis for ${sym}: 100+ ratios, Altman Z-Score, Piotroski F-Score, DCF fair value, and narrative insights.`,
-    alternates: { canonical: `https://sunveracapital.com/analyze/${sym}` },
+    alternates: { canonical: `${SITE_URL}/analyze/${sym}` },
   };
 }
 
