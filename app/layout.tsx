@@ -8,6 +8,7 @@ import CurrencyProvider, { CurrencySelect } from "@/components/CurrencyProvider"
 import MobileNav from "@/components/MobileNav";
 import { ToastProvider } from "@/components/Toast";
 import SocialLinks from "@/components/SocialLinks";
+import FeedbackWidget from "@/components/FeedbackWidget";
 import "./globals.css";
 
 export const viewport: Viewport = {
@@ -305,7 +306,8 @@ export default function RootLayout({
         </CurrencyProvider>
         </ToastProvider>
         </Providers>
-      </body>
+            <FeedbackWidget />
+    </body>
     </html>
   );
 }

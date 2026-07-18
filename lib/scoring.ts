@@ -45,6 +45,14 @@ export function altmanZ(data: CompanyData, d: Derived): AltmanResult {
     };
   }
 
+  // Altman Z-Score formula (original 1968 model for public manufacturers):
+  // Z = 1.2*X1 + 1.4*X2 + 3.3*X3 + 0.6*X4 + 1.0*X5
+  // X1 = Working Capital / Total Assets (liquidity)
+  // X2 = Retained Earnings / Total Assets (accumulated profitability)
+  // X3 = EBIT / Total Assets (operating efficiency)
+  // X4 = Market Cap / Total Liabilities (leverage/solvency)
+  // X5 = Revenue / Total Assets (asset turnover)
+  // Zones: Z > 2.99 = safe, 1.81 <= Z <= 2.99 = grey zone, Z < 1.81 = distress
   const z = 1.2 * x1! + 1.4 * x2! + 3.3 * x3! + 0.6 * x4! + 1.0 * x5!;
   const zone = z > 2.99 ? "safe" : z >= 1.81 ? "grey" : "distress";
   return {
@@ -156,17 +164,24 @@ export function dcf(data: CompanyData, d: Derived): DcfResult {
     };
   }
 
+  // DCF Valuation: 5-year explicit forecast + Gordon Growth terminal value
+  // PV = sum(FCF_t / (1 + r)^t) + TerminalValue / (1 + r)^T
+  // TerminalValue = FCF_T * (1 + g) / (r - g)  [Gordon Growth Model]
+  // r = discount rate (WACC), g = terminal growth rate
   let pv = 0;
   let f = baseFcf;
   for (let t = 1; t <= years; t++) {
     f *= 1 + growthRate;
     pv += f / Math.pow(1 + discountRate, t);
   }
+  // Gordon Growth Model: TV = FCF_final * (1 + g) / (r - g)
   const terminal = (f * (1 + terminalGrowth)) / (discountRate - terminalGrowth);
   pv += terminal / Math.pow(1 + discountRate, years);
 
   const equityValue = pv - (d.netDebt ?? 0);
   const fair = equityValue / d.shares;
+  // Margin of Safety = (Fair Value - Current Price) / Fair Value
+  // Positive MoS suggests the stock is undervalued
   const mos = fair > 0 ? (fair - d.price) / fair : null;
 
   return {
