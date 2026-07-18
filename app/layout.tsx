@@ -4,6 +4,8 @@ import Link from "next/link";
 import Providers from "./Providers";
 import TickerSearch from "@/components/TickerSearch";
 import CurrencyProvider, { CurrencySelect } from "@/components/CurrencyProvider";
+import MobileNav from "@/components/MobileNav";
+import { ToastProvider } from "@/components/Toast";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -154,6 +156,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-full flex flex-col bg-[#0a0e1a] text-slate-100">
         <Providers>
+        <ToastProvider>
         <CurrencyProvider>
         {/* Skip-to-content link — keyboard accessibility (WCAG 2.4.1) */}
         <a
@@ -211,6 +214,7 @@ export default function RootLayout({
                 <span aria-hidden="true">🌍</span> <span className="hidden sm:inline">Global</span>
               </Link>
               <CurrencySelect />
+              <MobileNav />
             </nav>
           </div>
         </header>
@@ -219,15 +223,24 @@ export default function RootLayout({
 
         {/* Global footer */}
         <footer className="border-t border-[#1e293b]/80 py-6">
-          <div className="max-w-7xl mx-auto px-6 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
-            <span>Sunvera Capital Holding LLC</span>
-            <span>
-              Data: Financial Modeling Prep &amp; Finnhub · Charts: TradingView · Research tool —
-              not investment advice
-            </span>
+          <div className="max-w-7xl mx-auto px-6 space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400">
+              <span>Sunvera Capital Holding LLC</span>
+              <span>
+                Data: Financial Modeling Prep &amp; Finnhub · Charts: TradingView · Research tool —
+                not investment advice
+              </span>
+            </div>
+            <nav className="flex flex-wrap gap-4 text-xs text-slate-500" aria-label="Legal links">
+              <Link href="/about" className="hover:text-[#c5a35e] transition-colors">About</Link>
+              <Link href="/contact" className="hover:text-[#c5a35e] transition-colors">Contact</Link>
+              <Link href="/terms" className="hover:text-[#c5a35e] transition-colors">Terms of Service</Link>
+              <Link href="/privacy" className="hover:text-[#c5a35e] transition-colors">Privacy Policy</Link>
+            </nav>
           </div>
         </footer>
         </CurrencyProvider>
+        </ToastProvider>
         </Providers>
       </body>
     </html>

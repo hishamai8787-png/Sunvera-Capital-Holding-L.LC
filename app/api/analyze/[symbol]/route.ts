@@ -1,10 +1,13 @@
 // JSON API: GET /api/analyze/AAPL — full analysis report.
+// Cached for 5 minutes to reduce external API calls.
 
 import { NextResponse } from "next/server";
 import { analyzeCompany } from "@/lib/analyze";
 import { DataSourceError } from "@/lib/fmp";
 import { validateTicker } from "@/lib/validation";
 import { rateLimitResponse } from "@/lib/rateLimit";
+
+export const revalidate = 300; // 5 minutes
 
 export async function GET(
   req: Request,
@@ -24,9 +27,12 @@ export async function GET(
 
   try {
     const report = await analyzeCompany(symbol);
-    return NextResponse.json(report);
+    return NextResponse.json(report, {
+      headers: {
+        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
+      },
+    });
   } catch (err) {
-    // Log full error server-side, return generic messages to client
     console.error("[analyze] Error:", err instanceof Error ? err.message : String(err));
     if (err instanceof DataSourceError) {
       return NextResponse.json(

@@ -317,17 +317,17 @@ export default async function CreditPage({
               </thead>
               <tbody>
                 {[
-                  { label: "Revenue", get: (t: any) => t.revenue },
-                  { label: "EBITDA", get: (t: any) => t.ebitda },
-                  { label: "Net Debt / EBITDA", get: (t: any) => t.netDebtEbitda },
-                  { label: "Interest Coverage", get: (t: any) => t.interestCoverage },
-                  { label: "Operating Cash Flow", get: (t: any) => t.ocf },
-                  { label: "Free Cash Flow", get: (t: any) => t.fcf },
+                  { label: "Revenue", get: (t: { revenue?: number | null; ebitda?: number | null; netDebtEbitda?: number | null; interestCoverage?: number | null; ocf?: number | null; fcf?: number | null }) => t.revenue },
+                  { label: "EBITDA", get: (t: { revenue?: number | null; ebitda?: number | null; netDebtEbitda?: number | null; interestCoverage?: number | null; ocf?: number | null; fcf?: number | null }) => t.ebitda },
+                  { label: "Net Debt / EBITDA", get: (t: { revenue?: number | null; ebitda?: number | null; netDebtEbitda?: number | null; interestCoverage?: number | null; ocf?: number | null; fcf?: number | null }) => t.netDebtEbitda },
+                  { label: "Interest Coverage", get: (t: { revenue?: number | null; ebitda?: number | null; netDebtEbitda?: number | null; interestCoverage?: number | null; ocf?: number | null; fcf?: number | null }) => t.interestCoverage },
+                  { label: "Operating Cash Flow", get: (t: { revenue?: number | null; ebitda?: number | null; netDebtEbitda?: number | null; interestCoverage?: number | null; ocf?: number | null; fcf?: number | null }) => t.ocf },
+                  { label: "Free Cash Flow", get: (t: { revenue?: number | null; ebitda?: number | null; netDebtEbitda?: number | null; interestCoverage?: number | null; ocf?: number | null; fcf?: number | null }) => t.fcf },
                 ].map((row) => (
                   <tr key={row.label} className="border-t border-slate-800/60">
                     <td className="px-5 py-2 text-slate-300">{row.label}</td>
                     {assessment.trend.map((t, i) => (
-                      <td key={i} className="px-3 py-2 text-right tabular-nums text-slate-200">{row.get(t) != null ? fx(row.get(t)) : "—"}</td>
+                      <td key={i} className="px-3 py-2 text-right tabular-nums text-slate-200">{row.get(t) != null ? fx(row.get(t) as number, 1) : "—"}</td>
                     ))}
                   </tr>
                 ))}
