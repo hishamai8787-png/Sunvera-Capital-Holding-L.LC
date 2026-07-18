@@ -18,6 +18,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/clients",
     "/playbooks",
     "/global",
+    "/compare",
+    "/forex",
+    "/crypto",
+    "/metals",
+    "/bonds",
   ].map((path) => ({
     url: `${base}${path}`,
     lastModified: now,

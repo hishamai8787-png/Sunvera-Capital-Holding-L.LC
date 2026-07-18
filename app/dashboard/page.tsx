@@ -16,6 +16,13 @@ const MODULES = [
     color: "from-blue-500/10 to-blue-600/5",
   },
   {
+    href: "/compare",
+    icon: "⚖️",
+    title: "Company Comparison",
+    desc: "Compare up to 5 companies across 15 financial metrics side-by-side",
+    color: "from-orange-500/10 to-orange-600/5",
+  },
+  {
     href: "/credit/AAPL",
     icon: "🏦",
     title: "Credit Proposals",
@@ -31,10 +38,38 @@ const MODULES = [
   },
   {
     href: "/markets",
-    icon: "📈",
+    icon: "📊",
     title: "Market Data Hub",
-    desc: "Live indices, FX, commodities, sector heatmap, watchlist",
+    desc: "Live indices, sector heatmap, watchlist, and streaming news",
     color: "from-purple-500/10 to-purple-600/5",
+  },
+  {
+    href: "/forex",
+    icon: "💱",
+    title: "Forex Rates",
+    desc: "Live FX rates across major, minor, emerging, and Gulf currencies",
+    color: "from-teal-500/10 to-teal-600/5",
+  },
+  {
+    href: "/crypto",
+    icon: "₿",
+    title: "Cryptocurrency",
+    desc: "Live prices for Bitcoin, Ethereum, and top altcoins",
+    color: "from-yellow-500/10 to-yellow-600/5",
+  },
+  {
+    href: "/metals",
+    icon: "🥇",
+    title: "Precious Metals",
+    desc: "Gold, silver, platinum, palladium, copper, and industrial minerals",
+    color: "from-amber-600/10 to-amber-700/5",
+  },
+  {
+    href: "/bonds",
+    icon: "📜",
+    title: "Bond Yields",
+    desc: "US Treasury and international sovereign bond yields",
+    color: "from-green-500/10 to-green-600/5",
   },
   {
     href: "/clients",
@@ -57,13 +92,6 @@ const MODULES = [
     desc: "Country-by-country market data and analysis",
     color: "from-indigo-500/10 to-indigo-600/5",
   },
-  {
-    href: "/settings",
-    icon: "⚙️",
-    title: "Settings",
-    desc: "Currency, default ticker, and data preferences",
-    color: "from-slate-500/10 to-slate-600/5",
-  },
 ];
 
 export default function DashboardPage() {
@@ -73,7 +101,7 @@ export default function DashboardPage() {
         <p className="text-xs tracking-[0.35em] uppercase text-[#c5a35e] mb-4">Dashboard</p>
         <h1 className="text-3xl font-semibold tracking-tight mb-8">Platform Overview</h1>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {MODULES.map((mod) => (
             <Link
               key={mod.title}

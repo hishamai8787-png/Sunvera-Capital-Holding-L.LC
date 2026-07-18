@@ -213,6 +213,37 @@ export default function RootLayout({
               >
                 <span aria-hidden="true">🌍</span> <span className="hidden sm:inline">Global</span>
               </Link>
+
+              <Link
+                href="/compare"
+                className="px-3 py-1.5 rounded-lg text-slate-300 hover:text-[#e0c887] hover:bg-[#1a2030]/60 transition-colors focus-visible:outline-2 focus-visible:outline-[#c5a35e] focus-visible:outline-offset-2"
+              >
+                <span aria-hidden="true">⚖️</span> <span className="hidden sm:inline">Compare</span>
+              </Link>
+              <Link
+                href="/forex"
+                className="px-3 py-1.5 rounded-lg text-slate-300 hover:text-[#e0c887] hover:bg-[#1a2030]/60 transition-colors focus-visible:outline-2 focus-visible:outline-[#c5a35e] focus-visible:outline-offset-2"
+              >
+                <span aria-hidden="true">💱</span> <span className="hidden sm:inline">Forex</span>
+              </Link>
+              <Link
+                href="/crypto"
+                className="px-3 py-1.5 rounded-lg text-slate-300 hover:text-[#e0c887] hover:bg-[#1a2030]/60 transition-colors focus-visible:outline-2 focus-visible:outline-[#c5a35e] focus-visible:outline-offset-2"
+              >
+                <span aria-hidden="true">₿</span> <span className="hidden sm:inline">Crypto</span>
+              </Link>
+              <Link
+                href="/metals"
+                className="px-3 py-1.5 rounded-lg text-slate-300 hover:text-[#e0c887] hover:bg-[#1a2030]/60 transition-colors focus-visible:outline-2 focus-visible:outline-[#c5a35e] focus-visible:outline-offset-2"
+              >
+                <span aria-hidden="true">🥇</span> <span className="hidden sm:inline">Metals</span>
+              </Link>
+              <Link
+                href="/bonds"
+                className="px-3 py-1.5 rounded-lg text-slate-300 hover:text-[#e0c887] hover:bg-[#1a2030]/60 transition-colors focus-visible:outline-2 focus-visible:outline-[#c5a35e] focus-visible:outline-offset-2"
+              >
+                <span aria-hidden="true">📜</span> <span className="hidden sm:inline">Bonds</span>
+              </Link>
               <CurrencySelect />
               <MobileNav />
             </nav>

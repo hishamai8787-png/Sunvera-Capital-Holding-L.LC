@@ -5,7 +5,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const NAV_LINKS = [
-  { href: "/markets", icon: "📈", label: "Markets" },
+  { href: "/markets", icon: "📊", label: "Markets" },
+  { href: "/compare", icon: "⚖️", label: "Compare" },
+  { href: "/forex", icon: "💱", label: "Forex" },
+  { href: "/crypto", icon: "₿", label: "Crypto" },
+  { href: "/metals", icon: "🥇", label: "Metals" },
+  { href: "/bonds", icon: "📜", label: "Bonds" },
   { href: "/playbooks", icon: "📒", label: "Playbooks" },
   { href: "/clients", icon: "👥", label: "Clients" },
   { href: "/scanner", icon: "🔎", label: "Scanner" },
@@ -19,7 +24,7 @@ export default function MobileNav() {
   const pathname = usePathname();
   const [prevPath, setPrevPath] = useState(pathname);
 
-  // Close menu on route change (compare, not in effect)
+  // Close menu on route change
   if (pathname !== prevPath) {
     setPrevPath(pathname);
     if (open) setOpen(false);
@@ -51,7 +56,7 @@ export default function MobileNav() {
       </button>
 
       {open && (
-        <div className="md:hidden fixed inset-0 z-50 top-14 bg-[#0a0e1a]/95 backdrop-blur-sm" id="mobile-nav">
+        <div className="md:hidden fixed inset-0 z-50 top-14 bg-[#0a0e1a]/95 backdrop-blur-sm overflow-y-auto" id="mobile-nav">
           <nav className="flex flex-col p-6 gap-2" aria-label="Mobile navigation">
             {NAV_LINKS.map((link) => {
               const active = pathname === link.href || pathname?.startsWith(link.href + "/");
