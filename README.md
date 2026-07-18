@@ -1,5 +1,7 @@
 # Sunvera Capital Holding LLC
 
+![CI/CD](https://github.com/hishamai8787-png/Sunvera-Capital-Holding-L.LC/actions/workflows/ci.yml/badge.svg)
+
 Institutional equity analysis and credit proposal platform.
 
 ## Features
@@ -18,27 +20,17 @@ Next.js 15, TypeScript, Tailwind CSS, Supabase, NextAuth.js, FMP API, Finnhub, d
 ## Getting Started
 
 1. npm install
-2. Copy .env.example to .env.local and fill in values
-3. Run supabase_migration.sql in Supabase SQL editor
-4. npm run dev
-5. Open http://localhost:3000
+2. Copy `.env.example` to `.env.local` and fill in required values
+3. `npm run dev` — development server at localhost:3000
+4. `npm run build` — production build
+5. `npm test` — unit tests (18 tests)
+6. `npm run test:e2e` — Playwright E2E tests (20 tests)
 
-## Scripts
+## Testing
 
-- npm run dev — Start dev server
-- npm run build — Production build
-- npm run lint — ESLint
-- npm test — Run test suite
-- npm run test:watch — Tests in watch mode
-
-## Security
-
-- API middleware with same-origin + Bearer token auth
-- Rate limiting (30/min standard, 3/min scanner)
-- Input validation on all endpoints
-- Security headers (CSP, HSTS, X-Frame-Options)
-- Row Level Security on database tables
-- NextAuth.js session management
+- **Unit tests:** 18 tests via Vitest
+- **E2E tests:** 20 Playwright tests across 4 suites (home, markets, navigation, accessibility)
+- **CI/CD:** GitHub Actions — lint, unit tests, build, and E2E on every push to main
 
 ## License
 
