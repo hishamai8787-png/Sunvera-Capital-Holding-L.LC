@@ -12,8 +12,9 @@ test.describe("Home Page", () => {
     await expect(page).toHaveTitle(/Sunvera Capital/);
     await expect(page.getByRole("heading", { name: /Research any company/i })).toBeVisible();
 
-    // Search input is present and has correct ARIA
-    const search = page.getByRole("combobox", { name: /Search for a company or ticker/i });
+    // Search input — there are two comboboxes with the same aria-label
+    // (header nav search + hero search). Use .first() for the hero one.
+    const search = page.getByRole("combobox", { name: /Search for a company or ticker/i }).first();
     await expect(search).toBeVisible();
 
     // Module cards
@@ -24,6 +25,8 @@ test.describe("Home Page", () => {
 
   test("skip-to-content link appears on focus", async ({ page }) => {
     await page.goto("/");
+    // Focus the page first, then Tab
+    await page.locator("body").focus();
     await page.keyboard.press("Tab");
     const skipLink = page.getByRole("link", { name: /Skip to main content/i });
     await expect(skipLink).toBeVisible();
