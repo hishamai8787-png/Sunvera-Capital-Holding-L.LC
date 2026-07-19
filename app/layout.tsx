@@ -296,7 +296,7 @@ export default function RootLayout({
 
             {/* Bottom row: copyright */}
             <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-400 border-t border-[#1e293b]/60 pt-4">
-              <span>© {new Date().getFullYear()} Sunvera Capital Holding LLC. All rights reserved.</span>
+              <span>© {new Date().getFullYear()} Sunvera Capital Holding LLC · MIT License</span>
               <span>
                 Data: FMP &amp; Finnhub · Charts: TradingView · Research tool — not investment advice
               </span>

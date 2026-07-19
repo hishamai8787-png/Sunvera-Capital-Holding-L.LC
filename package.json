@@ -44,5 +44,14 @@
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.1.10"
-  }
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hishamai8787-png/Sunvera-Capital-Holding-L.LC.git"
+  },
+  "bugs": {
+    "url": "https://github.com/hishamai8787-png/Sunvera-Capital-Holding-L.LC/issues"
+  },
+  "homepage": "https://github.com/hishamai8787-png/Sunvera-Capital-Holding-L.LC#readme"
 }
