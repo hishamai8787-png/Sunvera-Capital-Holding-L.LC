@@ -6,6 +6,8 @@
 
 Open-source institutional equity analysis and credit proposal platform.
 
+📖 **Read the White Paper** — [SUNV Token White Paper](docs/WHITEPAPER.md)
+
 ## Features
 
 - *Company Analysis* — Altman Z-Score, Piotroski F-Score, DCF valuation, quality/valuation/growth scoring
