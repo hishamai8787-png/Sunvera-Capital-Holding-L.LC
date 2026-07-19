@@ -1,16 +1,25 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
+import { randomBytes } from "crypto";
 
 /**
- * Middleware — handles both Supabase session refresh and API protection.
+ * Middleware — handles security for all requests.
  *
  * 1. Refreshes Supabase auth sessions on every request
- * 2. Protects API routes from external abuse
- * 3. Allows same-origin frontend calls to pass through
+ * 2. Protects API routes from external abuse (same-origin + Bearer token)
+ * 3. CSRF protection for state-changing methods (POST/PUT/PATCH/DELETE)
+ * 4. Request body size limiting (prevents oversized payload attacks)
+ * 5. Sets CSRF token cookie on safe requests (GET/HEAD/OPTIONS)
+ * 6. Sets additional security headers not covered by next.config.ts
  *
  * SECURITY: Uses exact host matching (not substring) to prevent origin spoofing.
  * Requests without Origin/Referer headers are NOT automatically allowed.
  */
+
+const CSRF_COOKIE = "sunvera-csrf";
+const CSRF_HEADER = "x-csrf-token";
+const MAX_BODY_SIZE = 1024 * 100; // 100KB
+const MAX_IMPORT_BODY_SIZE = 1024 * 1024; // 1MB for import endpoints
 
 async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
@@ -81,11 +90,51 @@ function isSameOriginRequest(req: NextRequest): boolean {
   return false;
 }
 
+/**
+ * CSRF validation — double-submit cookie pattern.
+ * Compares cookie token with header token using constant-time comparison.
+ */
+function validateCSRF(req: NextRequest): boolean {
+  const cookieToken = req.cookies.get(CSRF_COOKIE)?.value;
+  const headerToken = req.headers.get(CSRF_HEADER);
+
+  if (!cookieToken || !headerToken) return false;
+  if (cookieToken.length !== headerToken.length) return false;
+
+  // Constant-time comparison
+  let match = true;
+  for (let i = 0; i < cookieToken.length; i++) {
+    if (cookieToken[i] !== headerToken[i]) match = false;
+  }
+  return match;
+}
+
+/**
+ * Request body size validation
+ */
+function validateBodySize(req: NextRequest): string | null {
+  const contentLength = req.headers.get("content-length");
+  if (!contentLength) return null;
+
+  const size = parseInt(contentLength, 10);
+  if (isNaN(size)) return null;
+
+  // Import endpoints get larger limit
+  const isImport = req.nextUrl.pathname.includes("/import");
+  const limit = isImport ? MAX_IMPORT_BODY_SIZE : MAX_BODY_SIZE;
+
+  if (size > limit) {
+    return `Request body too large (${size} bytes). Maximum: ${limit} bytes.`;
+  }
+
+  return null;
+}
+
 export async function middleware(req: NextRequest) {
   // Refresh Supabase session
   const { supabaseResponse } = await updateSession(req);
 
-  // Skip non-API paths
+  // Skip static assets
   if (
     req.nextUrl.pathname.startsWith("/_next") ||
     req.nextUrl.pathname.startsWith("/favicon")
@@ -93,34 +142,65 @@ export async function middleware(req: NextRequest) {
     return supabaseResponse;
   }
 
+  // For non-API GET/HEAD/OPTIONS requests: set CSRF cookie if not present
+  const method = req.method.toUpperCase();
+  const isStateChanging = ["POST", "PUT", "PATCH", "DELETE"].includes(method);
+
   if (!req.nextUrl.pathname.startsWith("/api")) {
+    // Set CSRF token cookie on non-API pages (for frontend forms)
+    if (!supabaseResponse.cookies.get(CSRF_COOKIE)) {
+      const token = randomBytes(32).toString("hex");
+      supabaseResponse.cookies.set(CSRF_COOKIE, token, {
+        httpOnly: false, // Frontend JS needs to read it
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        path: "/",
+        maxAge: 60 * 60 * 24, // 24 hours
+      });
+    }
     return supabaseResponse;
   }
 
-  // API protection
+  // === API PROTECTION ===
+
+  // Body size check (before auth — reject oversized requests immediately)
+  const sizeError = validateBodySize(req);
+  if (sizeError) {
+    return NextResponse.json({ error: sizeError }, { status: 413 });
+  }
+
+  // Auth check: Bearer token or same-origin
   const auth = req.headers.get("authorization");
   const validToken = process.env.APP_API_TOKEN;
+  const hasBearerToken = validToken && auth === `Bearer ${validToken}`;
+  const isSameOrigin = isSameOriginRequest(req);
 
-  // 1. Valid Bearer token always passes
-  if (validToken && auth === `Bearer ${validToken}`) {
-    return supabaseResponse;
+  if (!hasBearerToken && !isSameOrigin) {
+    return NextResponse.json(
+      {
+        error: validToken
+          ? "Unauthorized — provide a valid Bearer token."
+          : "External API access is not configured.",
+      },
+      { status: 401 }
+    );
   }
 
-  // 2. Same-origin requests pass (frontend calling its own API)
-  //    Uses exact host matching — no substring, no missing-header bypass
-  if (isSameOriginRequest(req)) {
-    return supabaseResponse;
+  // CSRF check for state-changing methods (same-origin only — Bearer token bypasses)
+  if (isStateChanging && isSameOrigin && !hasBearerToken) {
+    if (!validateCSRF(req)) {
+      return NextResponse.json(
+        { error: "CSRF token missing or invalid." },
+        { status: 403 }
+      );
+    }
   }
 
-  // 3. Block external requests without a token
-  return NextResponse.json(
-    {
-      error: validToken
-        ? "Unauthorized — provide a valid Bearer token."
-        : "External API access is not configured.",
-    },
-    { status: 401 }
-  );
+  // Add security headers to API responses
+  supabaseResponse.headers.set("X-Robots-Tag", "noindex, nofollow");
+  supabaseResponse.headers.set("X-API-Version", "1.0");
+
+  return supabaseResponse;
 }
 
 export const config = {
