@@ -17,7 +17,7 @@ const withSentry = (config: NextConfig): NextConfig => {
 // ---------- Security headers ----------
 const ContentSecurityPolicy = `
   default-src 'self';
-  script-src 'self' 'unsafe-inline' 'unsafe-eval' https://s3.tradingview.com;
+  script-src 'self' 'unsafe-inline' https://s3.tradingview.com;
   style-src 'self' 'unsafe-inline' https://s3.tradingview.com;
   img-src 'self' data: https: blob:;
   font-src 'self' data:;

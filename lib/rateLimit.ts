@@ -28,6 +28,12 @@ const SCANNER_LIMIT: RateLimitConfig = {
   maxRequests: 3,           // 3 scans per minute
 };
 
+// Export endpoint: 5 exports per minute
+const EXPORT_LIMIT: RateLimitConfig = {
+  windowMs: 60 * 1000,
+  maxRequests: 5,
+};
+
 // ---------- In-memory fallback (development only) ----------
 
 interface RateBucket {
@@ -150,4 +156,11 @@ const CONTACT_LIMIT: RateLimitConfig = {
   maxRequests: 5,
 };
 
-export { API_LIMIT, SCANNER_LIMIT, CONTACT_LIMIT };
+export const RATE_LIMITS = {
+  api: API_LIMIT,
+  scanner: SCANNER_LIMIT,
+  export: EXPORT_LIMIT,
+  contact: CONTACT_LIMIT,
+};
+
+export { API_LIMIT, SCANNER_LIMIT, EXPORT_LIMIT, CONTACT_LIMIT };

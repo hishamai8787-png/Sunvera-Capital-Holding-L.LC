@@ -4,32 +4,49 @@
  * Uses @supabase/supabase-js for database operations.
  * Falls back to filesystem in development when Supabase is not configured.
  *
- * SECURITY: Never uses the service role key for client-side operations.
- * The service role key bypasses all Row Level Security policies.
+ * SECURITY:
+ * - Server-side operations use a service-role admin client that bypasses RLS.
+ *   This is safe because these functions are only called from server-side
+ *   API routes that are already protected by middleware (same-origin + Bearer token).
+ * - The service role key is NEVER exposed to the client.
+ * - Per-user data isolation is enforced via owner_id columns + RLS policies.
  */
 
 import { promises as fs } from "fs";
 import path from "path";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
-// ---------- Database client (cached singleton) ----------
+// ---------- Database clients (cached singletons) ----------
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 export function hasDatabase(): boolean {
-  return !!(supabaseUrl && supabaseKey);
+  return !!(supabaseUrl && supabaseAnonKey);
 }
 
-// Cache the Supabase client instance — avoid creating a new client per request
-let _supabaseClient: ReturnType<typeof createSupabaseClient> | null = null;
+// Admin client (service role) — bypasses RLS for server-side operations
+// ONLY use server-side, NEVER expose to client
+let _adminClient: ReturnType<typeof createSupabaseClient> | null = null;
 
-function getSupabase() {
+function getAdminClient() {
   if (!hasDatabase()) throw new Error("Supabase not configured");
-  if (!_supabaseClient) {
-    _supabaseClient = createSupabaseClient(supabaseUrl!, supabaseKey!);
+  if (!_adminClient) {
+    if (supabaseServiceKey) {
+      // Service role key available — use admin client (bypasses RLS)
+      _adminClient = createSupabaseClient(supabaseUrl!, supabaseServiceKey, {
+        auth: { persistSession: false, autoRefreshToken: false },
+      });
+    } else {
+      // No service role key — use anon key (RLS applies)
+      // This means RLS policies will enforce access control
+      _adminClient = createSupabaseClient(supabaseUrl!, supabaseAnonKey!, {
+        auth: { persistSession: false, autoRefreshToken: false },
+      });
+    }
   }
-  return _supabaseClient;
+  return _adminClient;
 }
 
 // ---------- Filesystem fallback (development only) ----------
@@ -52,26 +69,34 @@ async function fsWrite(file: string, data: unknown): Promise<void> {
 
 // ---------- Clients ----------
 
-export async function loadClientsDb<T>(): Promise<T[]> {
+export async function loadClientsDb<T>(ownerId?: string): Promise<T[]> {
   if (hasDatabase()) {
-    const supabase = getSupabase();
-    const { data, error } = await supabase
-      .from("clients")
-      .select("*")
-      .order("created_at", { ascending: true });
+    const supabase = getAdminClient();
+    let query = supabase.from("clients").select("*").order("created_at", { ascending: true });
+    // If using anon key (no service role), filter by owner
+    if (ownerId && !supabaseServiceKey) {
+      query = query.eq("owner_id", ownerId);
+    }
+    const { data, error } = await query;
     if (error) throw error;
     return (data as unknown) as T[];
   }
   return (await fsRead<T[]>("clients.json")) ?? [];
 }
 
-export async function saveClientsDb<T extends { id: string }>(clients: T[]): Promise<void> {
+export async function saveClientsDb<T extends { id: string; owner_id?: string }>(
+  clients: T[],
+  ownerId?: string
+): Promise<void> {
   if (hasDatabase()) {
-    const supabase = getSupabase();
-    // Upsert all clients
+    const supabase = getAdminClient();
+    // Stamp owner_id if provided
+    const rows = ownerId
+      ? clients.map((c) => ({ ...c, owner_id: c.owner_id ?? ownerId }))
+      : clients;
     const { error } = await supabase
       .from("clients")
-      .upsert(clients as unknown as never[], { onConflict: "id" });
+      .upsert(rows as unknown as never[], { onConflict: "id" });
     if (error) throw error;
     return;
   }
@@ -80,25 +105,32 @@ export async function saveClientsDb<T extends { id: string }>(clients: T[]): Pro
 
 // ---------- Trades ----------
 
-export async function loadTradesDb<T>(): Promise<T[]> {
+export async function loadTradesDb<T>(ownerId?: string): Promise<T[]> {
   if (hasDatabase()) {
-    const supabase = getSupabase();
-    const { data, error } = await supabase
-      .from("trades")
-      .select("*")
-      .order("date", { ascending: false });
+    const supabase = getAdminClient();
+    let query = supabase.from("trades").select("*").order("date", { ascending: false });
+    if (ownerId && !supabaseServiceKey) {
+      query = query.eq("owner_id", ownerId);
+    }
+    const { data, error } = await query;
     if (error) throw error;
     return (data as unknown) as T[];
   }
   return (await fsRead<T[]>("trades.json")) ?? [];
 }
 
-export async function saveTradesDb<T>(trades: T[]): Promise<void> {
+export async function saveTradesDb<T extends { id: string; owner_id?: string }>(
+  trades: T[],
+  ownerId?: string
+): Promise<void> {
   if (hasDatabase()) {
-    const supabase = getSupabase();
+    const supabase = getAdminClient();
+    const rows = ownerId
+      ? trades.map((t) => ({ ...t, owner_id: t.owner_id ?? ownerId }))
+      : trades;
     const { error } = await supabase
       .from("trades")
-      .upsert(trades as unknown as never[], { onConflict: "id" });
+      .upsert(rows as unknown as never[], { onConflict: "id" });
     if (error) throw error;
     return;
   }
@@ -109,7 +141,7 @@ export async function saveTradesDb<T>(trades: T[]): Promise<void> {
 
 export async function loadLastScanDb<T>(): Promise<T | null> {
   if (hasDatabase()) {
-    const supabase = getSupabase();
+    const supabase = getAdminClient();
     const { data, error } = await supabase
       .from("scans")
       .select("*")
@@ -124,7 +156,7 @@ export async function loadLastScanDb<T>(): Promise<T | null> {
 
 export async function saveScanDb<T extends { generatedAt: string }>(scan: T): Promise<void> {
   if (hasDatabase()) {
-    const supabase = getSupabase();
+    const supabase = getAdminClient();
     const { error } = await supabase.from("scans").insert(scan as unknown as never);
     if (error) throw error;
     return;

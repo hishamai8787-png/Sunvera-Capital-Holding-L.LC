@@ -1,10 +1,23 @@
 // GET /api/export?type=clients|trades|scan — exports user data as CSV or JSON
+// Requires authentication (same-origin or Bearer token via middleware).
 
 import { NextRequest, NextResponse } from "next/server";
 import { logger } from "@/lib/logger";
 import { loadClientsDb, loadTradesDb, loadLastScanDb } from "@/lib/db";
+import { rateLimit, getClientIp, EXPORT_LIMIT } from "@/lib/rateLimit";
 
 export async function GET(req: NextRequest) {
+  // Rate limit: 5 exports per minute
+  const ip = getClientIp(req);
+  const rl = await rateLimit(ip, "export", EXPORT_LIMIT);
+  if (!rl.allowed) {
+    const retryAfter = Math.ceil((rl.resetAt - Date.now()) / 1000);
+    return NextResponse.json(
+      { error: "Rate limit exceeded. Please try again shortly.", retryAfterSeconds: retryAfter },
+      { status: 429, headers: { "Retry-After": String(retryAfter) } }
+    );
+  }
+
   try {
     const { searchParams } = new URL(req.url);
     const type = searchParams.get("type") || "clients";
