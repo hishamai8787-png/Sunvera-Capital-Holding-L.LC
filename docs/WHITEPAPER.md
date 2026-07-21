@@ -1,5 +1,5 @@
 # Sunvera Token (SUNV)
-## White Paper v1.0
+## White Paper v1.2
 ### July 2026
 
 ---
