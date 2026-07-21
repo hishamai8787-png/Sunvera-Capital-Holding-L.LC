@@ -216,7 +216,7 @@ SUNV Token (ERC-20)
 
 ### 4.5 Cross-Chain Expansion Strategy
 
-While SUNV launches on Ethereum with Layer 2 support (Base, Arbitrum), the architecture is designed to support future expansion to non-EVM chains including Solana, without requiring migration of existing contracts.
+While SUNV launches on Ethereum with Layer 2 support (Base, Arbitrum), the architecture is designed to support future expansion across all major blockchain ecosystems without requiring migration of existing contracts.
 
 *Principle: Expand, not migrate.* The Ethereum deployment remains the canonical source of truth. Additional chains are connected via bridges, allowing SUNV to circulate across ecosystems while preserving the primary contract state.
 
@@ -225,36 +225,82 @@ While SUNV launches on Ethereum with Layer 2 support (Base, Arbitrum), the archi
 2. Uniswap V3 liquidity pools on primary chain
 3. Governance and staking on Ethereum
 
-*Phase 2 (Q3 2027):* EVM cross-chain bridge
-1. Wormhole or LayerZero integration for SUNV transfers between Ethereum, Base, and Arbitrum
-2. Unified staking across L2s (staking on Base earns same rewards as Ethereum)
-3. Governance voting power aggregated across chains
+*Phase 2 (Q3 2027):* EVM ecosystem expansion
+1. Wormhole or LayerZero integration for SUNV transfers across all EVM chains
+2. Deploy on BNB Smart Chain — access to Binance ecosystem and Asian markets (PancakeSwap liquidity)
+3. Deploy on Avalanche — enterprise subnets and institutional DeFi (Trader Joe liquidity)
+4. Deploy on Polygon PoS — low-cost transactions for retail users (QuickSwap liquidity)
+5. Deploy on Optimism — Superchain ecosystem and OP Stack rollups (Velodrome liquidity)
+6. Deploy on zkSync Era — zero-knowledge scaling for privacy-conscious users (Mute liquidity)
+7. Unified staking across all EVM chains (staking on any chain earns same rewards)
+8. Governance voting power aggregated across all chains via bridge messaging
 
-*Phase 3 (2028+):* Non-EVM expansion (Solana)
+*Phase 3 (Q1 2028):* Non-EVM expansion — Solana
 1. Deploy SUNV as an SPL token on Solana using the Anchor framework
 2. Build Solana-native staking and fee manager contracts in Rust
-3. Bridge SUNV between Ethereum and Solana via Wormhole's Portal Bridge
+3. Bridge SUNV between Ethereum and Solana via Wormhole Portal Bridge
 4. Create liquidity pool on Orca or Raydium (Solana DEXes)
 5. Solana-specific security audit (Rust contracts require separate review)
 6. Governance remains on Ethereum — Solana SUNV holders bridge back to vote
 
+*Phase 4 (Q3 2028):* Non-EVM expansion — Cosmos and beyond
+1. Deploy SUNV as an IBC-enabled token on a Sunvera app-chain via Cosmos SDK
+2. Native cross-chain transfers via IBC (Inter-Blockchain Communication) to Cosmos Hub, Osmosis, and Injective
+3. Sui and Aptos evaluation — Move language contracts for high-throughput institutional settlement
+4. Near Protocol integration — for low-cost smart contract access in emerging markets
+5. Cardano evaluation — for regulated institutional markets requiring formal verification
+
+*Phase 5 (2029+):* App-chain sovereignty
+1. Evaluate launching a Sunvera Layer 1 app-chain (OP Stack rollup or Cosmos SDK zone)
+2. Custom fee markets, sequencer selection, and data availability layers
+3. Native institutional compliance modules at the chain level (geo-blocking, KYC gating)
+4. Shared security via EigenLayer (Ethereum) or Cosmos Interchain Security
+
 *Why expand, not migrate:*
 1. Ethereum contracts are immutable — migration is technically impossible without deploying new contracts
 2. Existing token holders and liquidity on Ethereum are preserved
-3. Users choose their preferred chain based on gas costs and speed
+3. Users choose their preferred chain based on gas costs, speed, and ecosystem
 4. Institutional credibility is anchored to the Ethereum deployment
-5. Solana expansion is demand-driven — deployed only when user adoption justifies the cost
+5. Each chain expansion is demand-driven — deployed only when user adoption justifies the cost
+6. Multi-chain presence increases SUNV's total addressable market and liquidity depth
 
-*Estimated cost of Solana expansion:* $35,000–$90,000 (Rust development + bridge integration + Solana-specific audit). Deployed only when cross-chain user demand is validated through governance.
+*Multi-chain bridge security model:*
+1. Wormhole as primary bridge protocol (connects 30+ chains, battle-tested)
+2. LayerZero as secondary bridge for EVM-to-EVM transfers (DVN-verified messaging)
+3. IBC for Cosmos ecosystem (trust-minimized, protocol-level security)
+4. Each bridge integration audited independently before activation
+5. Bridge transaction limits and timelocks for large transfers
+6. Emergency bridge pause capability via governance
 
-*Decision framework:* The DAO will evaluate Solana expansion based on:
-1. Verified user demand from the Solana ecosystem
+*Estimated cost per chain expansion:*
+
+| Chain | Type | Development | Audit | Liquidity | Total |
+|-------|------|------------|-------|-----------|-------|
+| BNB Smart Chain | EVM | $2K-$5K | Shared audit | 1-3 BNB | $5K-$15K |
+| Avalanche | EVM | $2K-$5K | Shared audit | 1-3 AVAX | $5K-$15K |
+| Polygon PoS | EVM | $2K-$5K | Shared audit | 1-3 MATIC | $5K-$15K |
+| Optimism | EVM | $2K-$5K | Shared audit | 1-3 ETH | $5K-$15K |
+| zkSync Era | EVM | $5K-$10K | Shared audit | 1-3 ETH | $10K-$20K |
+| Solana | Non-EVM | $15K-$40K | $15K-$35K | 1-5 SOL | $35K-$90K |
+| Cosmos (IBC) | Non-EVM | $20K-$50K | $20K-$40K | N/A | $40K-$100K |
+| Sui/Aptos | Non-EVM | $15K-$40K | $15K-$35K | 1-5 SUI/APT | $35K-$90K |
+| Near | Non-EVM | $10K-$30K | $10K-$25K | 1-5 NEAR | $25K-$65K |
+| App-chain | L1 | $50K-$150K | $30K-$60K | N/A | $80K-$250K |
+
+*Full multi-chain expansion budget:* $175K-$585K (deployed progressively over 2027-2029 based on demand)
+
+*Decision framework:* The DAO will evaluate each chain expansion based on:
+1. Verified user demand from that chain's ecosystem
 2. Cost-benefit analysis of development and audit expenses
-3. Bridge security assessment (Wormhole audit history)
-4. Liquidity requirements for a viable Solana pool
-5. Community vote with simple majority approval
+3. Bridge security assessment and audit history
+4. Liquidity requirements for a viable DEX pool
+5. Regulatory considerations for that chain's primary user base
+6. Community vote with simple majority approval
+7. Maximum 2 new chains per quarter to manage technical risk
 
 ---
+
+
 
 ## 5. Governance
 
@@ -324,10 +370,10 @@ This encourages long-term alignment and reduces governance attacks.
 ### Phase 3: On-Chain Analytics (Q3 2027)
 1. Oracle feeds for Sunvera analysis scores
 2. On-chain credit ratings
-3. Cross-chain bridge (Ethereum ↔ Base ↔ Arbitrum)
+3. Cross-chain bridge (Ethereum ↔ Base ↔ Arbitrum ↔ BNB ↔ Avalanche ↔ Polygon ↔ Optimism ↔ zkSync)
 4. DeFi protocol integrations (lending, derivatives)
 5. Data marketplace beta launch
-6. Non-EVM expansion feasibility study (Solana, Cosmos)
+6. EVM multi-chain deployment (6+ chains via Wormhole/LayerZero)
 
 ### Phase 4: Institutional Adoption (Q1 2028)
 1. Enterprise licensing via SUNV bonding
@@ -343,7 +389,9 @@ This encourages long-term alignment and reduces governance attacks.
 4. AI-powered analysis assistant (SUNV-gated)
 5. Real-time collaborative analysis rooms
 6. Solana deployment (SPL token + bridge + Orca/Raydium liquidity)
-7. Cosmos app-chain evaluation for institutional-grade settlement
+7. Cosmos IBC deployment (app-chain + Osmosis + Injective)
+8. Sui/Aptos and Near evaluation for high-throughput markets
+9. App-chain feasibility study (OP Stack or Cosmos SDK)
 
 ---
 
