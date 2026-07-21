@@ -214,6 +214,48 @@ SUNV Token (ERC-20)
 
 ---
 
+### 4.5 Cross-Chain Expansion Strategy
+
+While SUNV launches on Ethereum with Layer 2 support (Base, Arbitrum), the architecture is designed to support future expansion to non-EVM chains including Solana, without requiring migration of existing contracts.
+
+*Principle: Expand, not migrate.* The Ethereum deployment remains the canonical source of truth. Additional chains are connected via bridges, allowing SUNV to circulate across ecosystems while preserving the primary contract state.
+
+*Phase 1 (Current):* EVM-native deployment
+1. SUNV on Ethereum mainnet with L2 bridges to Base and Arbitrum
+2. Uniswap V3 liquidity pools on primary chain
+3. Governance and staking on Ethereum
+
+*Phase 2 (Q3 2027):* EVM cross-chain bridge
+1. Wormhole or LayerZero integration for SUNV transfers between Ethereum, Base, and Arbitrum
+2. Unified staking across L2s (staking on Base earns same rewards as Ethereum)
+3. Governance voting power aggregated across chains
+
+*Phase 3 (2028+):* Non-EVM expansion (Solana)
+1. Deploy SUNV as an SPL token on Solana using the Anchor framework
+2. Build Solana-native staking and fee manager contracts in Rust
+3. Bridge SUNV between Ethereum and Solana via Wormhole's Portal Bridge
+4. Create liquidity pool on Orca or Raydium (Solana DEXes)
+5. Solana-specific security audit (Rust contracts require separate review)
+6. Governance remains on Ethereum — Solana SUNV holders bridge back to vote
+
+*Why expand, not migrate:*
+1. Ethereum contracts are immutable — migration is technically impossible without deploying new contracts
+2. Existing token holders and liquidity on Ethereum are preserved
+3. Users choose their preferred chain based on gas costs and speed
+4. Institutional credibility is anchored to the Ethereum deployment
+5. Solana expansion is demand-driven — deployed only when user adoption justifies the cost
+
+*Estimated cost of Solana expansion:* $35,000–$90,000 (Rust development + bridge integration + Solana-specific audit). Deployed only when cross-chain user demand is validated through governance.
+
+*Decision framework:* The DAO will evaluate Solana expansion based on:
+1. Verified user demand from the Solana ecosystem
+2. Cost-benefit analysis of development and audit expenses
+3. Bridge security assessment (Wormhole audit history)
+4. Liquidity requirements for a viable Solana pool
+5. Community vote with simple majority approval
+
+---
+
 ## 5. Governance
 
 ### 5.1 DAO Structure
@@ -285,6 +327,7 @@ This encourages long-term alignment and reduces governance attacks.
 3. Cross-chain bridge (Ethereum ↔ Base ↔ Arbitrum)
 4. DeFi protocol integrations (lending, derivatives)
 5. Data marketplace beta launch
+6. Non-EVM expansion feasibility study (Solana, Cosmos)
 
 ### Phase 4: Institutional Adoption (Q1 2028)
 1. Enterprise licensing via SUNV bonding
@@ -299,6 +342,8 @@ This encourages long-term alignment and reduces governance attacks.
 3. Mobile app (iOS + Android)
 4. AI-powered analysis assistant (SUNV-gated)
 5. Real-time collaborative analysis rooms
+6. Solana deployment (SPL token + bridge + Orca/Raydium liquidity)
+7. Cosmos app-chain evaluation for institutional-grade settlement
 
 ---
 
