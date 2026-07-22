@@ -1,6 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
-import { randomBytes } from "crypto";
 
 /**
  * Middleware — handles security for all requests.
@@ -149,7 +148,9 @@ export async function middleware(req: NextRequest) {
   if (!req.nextUrl.pathname.startsWith("/api")) {
     // Set CSRF token cookie on non-API pages (for frontend forms)
     if (!supabaseResponse.cookies.get(CSRF_COOKIE)) {
-      const token = randomBytes(32).toString("hex");
+      const tokenBytes = new Uint8Array(32);
+      crypto.getRandomValues(tokenBytes);
+      const token = Array.from(tokenBytes).map(b => b.toString(16).padStart(2, "0")).join("");
       supabaseResponse.cookies.set(CSRF_COOKIE, token, {
         httpOnly: false, // Frontend JS needs to read it
         secure: process.env.NODE_ENV === "production",
